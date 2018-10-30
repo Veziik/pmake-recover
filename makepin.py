@@ -104,7 +104,7 @@ def parse():
 			\n-l <integer> : length limit, truncates output to given size, default infinity
 			\n-p: pad, pad with random amount of trash data, false by default
 			\n-e: encrypt, pads and encrypts to bytes, false by default, still in development
-			\n-w: use words instead of letter strings (easier memorization), still in development
+			\n-w: use words instead of letter strings for easier memorization
 			""")
 		sys.exit(0)
 

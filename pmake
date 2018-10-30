@@ -4,6 +4,7 @@ import hashlib
 import random
 import time
 import struct
+from words import *
 
 
 def replace_with_symbol(optional):
@@ -19,20 +20,47 @@ def add_symbol(optional):
 	symbols = '1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM' + optional
 	return symbols[random.randint(0,len(symbols)-1)]
 
+def add_word(words, length):
+	if length == -1:
+		return words[random.randint(0,len(words)-1)]
+	else:
+		words_of_a_certain_length = []
+
+		for word in words:
+			if len(word) <= length:
+				words_of_a_certain_length.append(word)
+
+		return words_of_a_certain_length[random.randint(0,len(words_of_a_certain_length)-1)]
+
 
 def write_to_file(filename, contents):
 	with open('files/'+filename , 'w') as file:	
 		file.write(contents)
 		print('\nnew password: ' + contents + '\nlength: '+ str(len(contents)) + '\nfile: ' + 'files/'+filename + '\npadding: false\nencryption: false')
 
-def write_padded(filename, contents, trashlen, optional):
-	
+def write_padded(filename, contents, trashlen, optional, words, wordlist):
 	front = ''
-	for i in range(0, trashlen): 
-		front += add_symbol(optional)
 	back = ''
-	for i in range(0, trashlen): 
-		back += add_symbol(optional)
+	if not words:
+		for i in range(0, trashlen): 
+			front += add_symbol(optional)
+		
+		for i in range(0, trashlen): 
+			back += add_symbol(optional)
+	else:
+		while len(front) < trashlen:
+			if random.randint(1,6) >= 4:
+				front += add_word(wordlist, trashlen - len(front))
+			else:
+				front += replace_with_symbol(optional)
+		front = front[0:trashlen]
+
+		while len(back) < trashlen:
+			if random.randint(1,6) >= 4:
+				back += add_word(wordlist, trashlen - len(back))
+			else:
+				back += replace_with_symbol(optional)
+		back = front[0:trashlen]
 
 	with open('files/' + filename, 'w') as file:
 		file.write(front + contents + back)
@@ -75,7 +103,8 @@ def parse():
 			\n-g <integer> : growth factor, -3 < x < 3, influences length of output, default 0
 			\n-l <integer> : length limit, truncates output to given size, default infinity
 			\n-p: pad, pad with random amount of trash data, false by default
-			\n-e: encrypt, pads and encrypts to bytes, false by default
+			\n-e: encrypt, pads and encrypts to bytes, false by default, still in development
+			\n-w: use words instead of letter strings (easier memorization), still in development
 			""")
 		sys.exit(0)
 
@@ -88,6 +117,8 @@ def parse():
 	length = -1
 	encrypt = 0
 	trashlength = 0
+	words = False
+	maxwordlength = -1
 	#if True:
 	try:
 		for i in range(0, len(sys.argv)):
@@ -95,32 +126,37 @@ def parse():
 				growthfactor = int(sys.argv[i+1])
 				if growthfactor > 3 or growthfactor < -3:
 					exit(1)
-			if sys.argv[i] == '-s':
+			elif sys.argv[i] == '-s':
 				symbols = sys.argv[i+1]
 				symbols = symbols.replace('\'', '')
-			if sys.argv[i] == '-sR':
+			elif sys.argv[i] == '-sR':
 				symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
 				taboos = sys.argv[i+1]
 				taboos = taboos.replace('\'', '')
 				for taboo in taboos:
 					symbols = symbols.replace(taboo, '')
-			if sys.argv[i] == '-sA':
+			elif sys.argv[i] == '-sA':
 				symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
-			if sys.argv[i] == '-l':
+			elif sys.argv[i] == '-l':
 				length = int(sys.argv[i+1])
-			if sys.argv[i] == '-p':
-					encrypt = 1
-					trashlength = seed_trashlength(sys.argv[1], sys.argv[2])
-			if sys.argv[i] == '-e':
-					encrypt = 2
-					trashlength = seed_trashlength(sys.argv[1], sys.argv[2])		
+			elif sys.argv[i] == '-p':
+				encrypt = 1
+				trashlength = seed_trashlength(sys.argv[1], sys.argv[2])
+			elif sys.argv[i] == '-e':
+				encrypt = 2
+				trashlength = seed_trashlength(sys.argv[1], sys.argv[2])
+			elif sys.argv[i] == '-w':
+				words = True
+				if i+1 < len(sys.argv) and '-' not in sys.argv[i+1] and not int(sys.argv[i+1]) < 1:
+					maxwordlength = int(sys.argv[i+1])
+						
 	except:
 	 	print('arguments missing or formatted incorrectly')
 	 	exit(1)	
 
 
 	#print(trashlength)
-	return (writepath, pinstr, growthfactor, symbols, length, encrypt, trashlength)
+	return (writepath, pinstr, growthfactor, symbols, length, encrypt, trashlength, words, maxwordlength)
 
 
 def scramble_hash(pinhash, symbols, growthfactor):
@@ -145,23 +181,80 @@ def scramble_hash(pinhash, symbols, growthfactor):
 	return pinhash
 
 
+def scramble_words(pinhash, symbols, length, growthfactor, wordlist):
+	newpass = ''
+	stop = False
+	i = 0
+
+
+
+	if length == -1:
+		while (not stop) and (i < len(pinhash)):
+			random.seed((time.time()-10000)+i)
+			if random.randint(1,6) >= 4:
+				if pinhash[i].isalpha():
+					newword = add_word(wordlist, length).capitalize()
+					newpass = newpass + newword 
+				
+				elif(pinhash[i].isdigit()):
+					if random.randint(1,6) >= 2:
+						newpass = newpass + replace_with_symbol(symbols)
+					else:
+						newpass = newpass + pinhash[i]
+			if random.randint(1,6) >= 2:
+				
+				pinhash = pinhash[int(len(pinhash)/2):int(len(pinhash))] + pinhash[0:int((len(pinhash)/2)-1)]
+			if random.randint(0,len(pinhash)) > len(pinhash) - i:
+				stop = True
+			i = i+1
+	else:
+		
+		while len(newpass) < length :
+			random.seed((time.time()-100)+i)
+			if random.randint(1,6) >=4:
+				if pinhash[i].isalpha():
+				
+					newword = add_word(wordlist, length - len(newpass)+1).capitalize()
+					
+					newpass = newpass + newword
+				elif(pinhash[i].isdigit()):
+					if random.randint(1,6) >= 2:
+						newpass = newpass + replace_with_symbol(symbols)
+					else:
+						newpass = newpass + pinhash[i]
+			random.seed((time.time()-10000)+i)
+			if random.randint(1,6) >= 4 :
+				pinhash = pinhash[int(len(pinhash)/2):int(len(pinhash))] + pinhash[0:int((len(pinhash)/2))]			
+			i = i + 1 
+		newpass = newpass[0:length]
+
+	
+	return newpass
+
 def truncate(pinhash, length):
 	return pinhash[0:length]
 
 def main():
-	(writepath, pinstr, growthfactor, symbols, length, encrypt, trashlength) = parse()	
-	
+	(writepath, pinstr, growthfactor, symbols, length, encrypt, trashlength, words, maxwordlength) = parse()	
+	wordlist = ''	
 	pinhash = hashlib.sha256(pinstr.encode('ascii')).hexdigest()
-	
-	pinhash = scramble_hash(pinhash,symbols,growthfactor)
 
-	if length != -1 and len(pinhash) > length:
-		pinhash = truncate(pinhash, length)
+	if words:
+		wordlist = importWords('words.txt', maxwordlength)
+		pinhash = scramble_words(pinhash,symbols, length, growthfactor, wordlist)
+		
+	else:
+	
+		pinhash = scramble_hash(pinhash,symbols,growthfactor)
+
+		if length != -1 and len(pinhash) > length:
+			pinhash = truncate(pinhash, length)
 
 	if encrypt == 0:
 		write_to_file(writepath, pinhash)
 	elif encrypt == 1:
-		write_padded(writepath, pinhash, trashlength, symbols)
+		write_padded(writepath, pinhash, trashlength, symbols, words, wordlist)
 	elif encrypt == 2:
 		write_encrypted(writepath, pinhash, trashlength, symbols)
+
 main()

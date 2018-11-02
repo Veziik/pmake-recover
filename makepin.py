@@ -38,24 +38,26 @@ def write_to_file(filename, contents):
 		file.write(contents)
 		print('\nnew password: ' + contents + '\nlength: '+ str(len(contents)) + '\nfile: ' + 'files/'+filename + '\npadding: false\nencryption: false')
 
-def write_padded(filename, contents, trashlen, optional, words, wordlist):
+def write_padded(filename, contents, optional, words, wordlist):
 	front = ''
 	back = ''
+	print('front: ' + str(seed_trashlength_front()))
+	print('back: ' + str(seed_trashlength_back()))
 	if not words:
-		for i in range(0, trashlen): 
+		for i in range(0, seed_trashlength_front()): 
 			front += add_symbol(optional)
 		
-		for i in range(0, trashlen): 
+		for i in range(0, seed_trashlength_back()): 
 			back += add_symbol(optional)
 	else:
-		while len(front) < trashlen:
+		while len(front) < seed_trashlength_front():
 			if random.randint(1,6) >= 4:
 				front += add_word(wordlist, trashlen - len(front))
 			else:
 				front += replace_with_symbol(optional)
 		front = front[0:trashlen]
 
-		while len(back) < trashlen:
+		while len(back) < seed_trashlength_back():
 			if random.randint(1,6) >= 4:
 				back += add_word(wordlist, trashlen - len(back))
 			else:
@@ -81,16 +83,27 @@ def write_encrypted(filename, contents, trashlen, optional):
 			file.write(struct.pack('!i', ord(char)))
 		print('\nnew password: ' + contents + '\nlength: '+ str(len(contents)) + '\nfile: ' + 'files/'+filename + '\npadding: true\nencryption: true')
 
-def seed_trashlength(key, path):
+def seed_trashlength_front():
 	sum1 = 0
-	for letter in key:
+	for letter in sys.argv[1]:
 		sum1 += ord(letter)
 
 	sum2 = 0
-	for letter in path:
+	for letter in sys.argv[2]:
 		sum2 += ord(letter)
 
 	return (sum1 ^ sum2)
+
+def seed_trashlength_back():
+	sum1 = 0
+	for letter in sys.argv[1]:
+		sum1 -= ord(letter)
+
+	sum2 = 0
+	for letter in sys.argv[2]:
+		sum2 += ord(letter)
+
+	return abs(~(sum1 & sum2))
 
 def parse():
 
@@ -141,10 +154,8 @@ def parse():
 				length = int(sys.argv[i+1])
 			elif sys.argv[i] == '-p':
 				encrypt = 1
-				trashlength = seed_trashlength(sys.argv[1], sys.argv[2])
 			elif sys.argv[i] == '-e':
 				encrypt = 2
-				trashlength = seed_trashlength(sys.argv[1], sys.argv[2])
 			elif sys.argv[i] == '-w':
 				words = True
 				if i+1 < len(sys.argv) and '-' not in sys.argv[i+1] and not int(sys.argv[i+1]) < 1:
@@ -156,7 +167,7 @@ def parse():
 
 
 	#print(trashlength)
-	return (writepath, pinstr, growthfactor, symbols, length, encrypt, trashlength, words, maxwordlength)
+	return (writepath, pinstr, growthfactor, symbols, length, encrypt,words, maxwordlength)
 
 
 def scramble_hash(pinhash, symbols, growthfactor):
@@ -235,7 +246,7 @@ def truncate(pinhash, length):
 	return pinhash[0:length]
 
 def main():
-	(writepath, pinstr, growthfactor, symbols, length, encrypt, trashlength, words, maxwordlength) = parse()	
+	(writepath, pinstr, growthfactor, symbols, length, encrypt, words, maxwordlength) = parse()	
 	wordlist = ''	
 	pinhash = hashlib.sha256(pinstr.encode('ascii')).hexdigest()
 
@@ -253,8 +264,8 @@ def main():
 	if encrypt == 0:
 		write_to_file(writepath, pinhash)
 	elif encrypt == 1:
-		write_padded(writepath, pinhash, trashlength, symbols, words, wordlist)
+		write_padded(writepath, pinhash, symbols, words, wordlist)
 	elif encrypt == 2:
-		write_encrypted(writepath, pinhash, trashlength, symbols)
+		write_encrypted(writepath, pinhash, symbols)
 
 main()

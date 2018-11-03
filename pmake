@@ -50,19 +50,21 @@ def write_padded(filename, contents, optional, words, wordlist):
 		for i in range(0, seed_trashlength_back()): 
 			back += add_symbol(optional)
 	else:
-		while len(front) < seed_trashlength_front():
+		frontlen = seed_trashlength_front()
+		while len(front) < frontlen:
 			if random.randint(1,6) >= 4:
-				front += add_word(wordlist, trashlen - len(front))
+				front += add_word(wordlist, frontlen - len(front))
 			else:
 				front += replace_with_symbol(optional)
-		front = front[0:trashlen]
+		front = front[0:frontlen]
 
-		while len(back) < seed_trashlength_back():
+		backlen = seed_trashlength_back()
+		while len(back) < backlen:
 			if random.randint(1,6) >= 4:
-				back += add_word(wordlist, trashlen - len(back))
+				back += add_word(wordlist, backlen - len(back))
 			else:
 				back += replace_with_symbol(optional)
-		back = front[0:trashlen]
+		back = front[0:backlen]
 
 	with open('files/' + filename, 'w') as file:
 		file.write(front + contents + back)

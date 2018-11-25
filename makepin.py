@@ -136,32 +136,48 @@ def parse():
 	maxwordlength = -1
 	#if True:
 	try:
-		for i in range(0, len(sys.argv)):
-			if sys.argv[i] == '-g':
-				growthfactor = int(sys.argv[i+1])
+		args = sys.argv
+		for i in range(0, len(args)):
+			if args[i] == '-q':
+				growthfactor = 3
+				symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
+				encrypt = 1
+				length = 32
+
+			elif args[i] == '-qW':
+				growthfactor = 3
+				symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
+				encrypt = 1
+				length = 32
+				words = True
+				maxwordlength = 5
+			elif args[i] == '-g':
+				growthfactor = int(args[i+1])
 				if growthfactor > 3 or growthfactor < -3:
 					exit(1)
-			elif sys.argv[i] == '-s':
-				symbols = sys.argv[i+1]
+			elif args[i] == '-s':
+				symbols = args[i+1]
 				symbols = symbols.replace('\'', '')
-			elif sys.argv[i] == '-sR':
+			elif args[i] == '-sR':
 				symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
-				taboos = sys.argv[i+1]
+				taboos = args[i+1]
 				taboos = taboos.replace('\'', '')
 				for taboo in taboos:
 					symbols = symbols.replace(taboo, '')
-			elif sys.argv[i] == '-sA':
+			elif args[i] == '-sA':
 				symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
-			elif sys.argv[i] == '-l':
-				length = int(sys.argv[i+1])
-			elif sys.argv[i] == '-p':
+			elif args[i] == '-l':
+				length = int(args[i+1])
+			elif args[i] == '-p':
 				encrypt = 1
-			elif sys.argv[i] == '-e':
+			elif args[i] == '-e':
 				encrypt = 2
-			elif sys.argv[i] == '-w':
+			elif args[i] == '-w':
 				words = True
-				if i+1 < len(sys.argv) and '-' not in sys.argv[i+1] and not int(sys.argv[i+1]) < 1:
-					maxwordlength = int(sys.argv[i+1])
+				if i+1 < len(args) and '-' not in args[i+1] and not int(args[i+1]) < 1:
+					maxwordlength = int(args[i+1])
+			
+
 						
 	except:
 	 	print('arguments missing or formatted incorrectly')

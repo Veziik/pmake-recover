@@ -120,6 +120,8 @@ def parse():
 			\n-p: pad, pad with random amount of trash data, false by default
 			\n-e: encrypt, pads and encrypts to bytes, false by default, still in development
 			\n-w: use words instead of letter strings for easier memorization
+			\n-q: quick setting for my most common options without words \'-sA -p -g 3 -l 32 \'
+			\n-qW: quick setting for my most common options with words \'-sA -p -g 3 -l 32 -w 5\'
 			""")
 		sys.exit(0)
 
@@ -148,7 +150,7 @@ def parse():
 				growthfactor = 3
 				symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
 				encrypt = 1
-				length = 32
+				length = 16
 				words = True
 				maxwordlength = 5
 			elif args[i] == '-g':

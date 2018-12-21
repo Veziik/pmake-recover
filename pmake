@@ -41,8 +41,8 @@ def write_to_file(filename, contents):
 def write_padded(filename, contents, optional, words, wordlist):
 	front = ''
 	back = ''
-	print('front: ' + str(seed_trashlength_front()))
-	print('back: ' + str(seed_trashlength_back()))
+	#print('front: ' + str(seed_trashlength_front()))
+	#print('back: ' + str(seed_trashlength_back()))
 	if not words:
 		for i in range(0, seed_trashlength_front()): 
 			front += add_symbol(optional)

@@ -152,7 +152,7 @@ def parse():
 				encrypt = 1
 				length = 16
 				words = True
-				maxwordlength = 5
+				maxwordlength = 4
 			elif args[i] == '-g':
 				growthfactor = int(args[i+1])
 				if growthfactor > 3 or growthfactor < -3:

@@ -1,6 +1,6 @@
 # pmake-recover
 
-A fast and easy password generator that was coded up in about thee days of casual coding. Not at all secure, though it does a good job of looking random
+A fast and easy password generator that was coded up in about three days of casual coding. Continually updated throughout the months to add features and streamline code. Not at all secure, though it does a good job of looking random
 
 All passwords will be placed into a driectory named files after running unless otherwise specified
 

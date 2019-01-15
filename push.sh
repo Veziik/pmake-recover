@@ -4,7 +4,7 @@ DATE=`date`
 COMMIT=" commit " 
 MESSAGE=""
 
-if [$# -eq 1]
+if [ $# -eq 1 ]
 then
 	MESSAGE="$1"
 fi

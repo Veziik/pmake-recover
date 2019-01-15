@@ -123,6 +123,7 @@ def parse():
 			\n-w: use words instead of letter strings for easier memorization
 			\n-q: quick setting for my most common options without words \'-sA -p -g 3 -l 32 \'
 			\n-qW: quick setting for my most common options with words \'-sA -p -g 3 -l 32 -w 5\'
+			\n-o: do not write to file
 			""")
 		sys.exit(0)
 
@@ -179,7 +180,8 @@ def parse():
 				words = True
 				if i+1 < len(args) and '-' not in args[i+1] and not int(args[i+1]) < 1:
 					maxwordlength = int(args[i+1])
-			
+			elif args[i] == '-o':
+				encrypt = 3
 
 						
 	except:
@@ -266,6 +268,9 @@ def scramble_words(pinhash, symbols, length, growthfactor, wordlist):
 def truncate(pinhash, length):
 	return pinhash[0:length]
 
+def print_without_write(contents):
+	print('\nnew password: ' + contents + '\nlength: '+ str(len(contents)) + '\nfile: ' + 'Not written to' + '\npadding: N/A\nencryption: N/A')
+
 def main():
 	(writepath, pinstr, growthfactor, symbols, length, encrypt, words, maxwordlength) = parse()	
 	wordlist = ''	
@@ -291,5 +296,7 @@ def main():
 		write_padded(writepath, pinhash, symbols, words, wordlist)
 	elif encrypt == 2:
 		write_encrypted(writepath, pinhash, symbols)
+	elif encrypt == 3:
+		print_without_write(pinhash)
 
 main()

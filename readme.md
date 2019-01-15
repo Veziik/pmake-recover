@@ -32,6 +32,8 @@ pmake : generates a password according to flags given
 			-q: quick setting for my most common options without words -sA -p -g 3 -l 32 
 
 			-qW: quick setting for my most common options with words -sA -p -g 3 -l 32 -w 5
+
+			-o: do not write to file
 			
 precover : recovers padded password
 

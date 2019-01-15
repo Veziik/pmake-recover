@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import os
 import hashlib
 import random
 import time
@@ -280,6 +281,9 @@ def main():
 
 		if length != -1 and len(pinhash) > length:
 			pinhash = truncate(pinhash, length)
+
+	if not os.path.exists('files'):
+		os.makedirs('files')
 
 	if encrypt == 0:
 		write_to_file(writepath, pinhash)

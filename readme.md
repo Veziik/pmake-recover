@@ -2,13 +2,16 @@
 
 A fast and easy password generator that was coded up in about thee days of casual coding. Not at all secure, though it does a good job of looking random
 
-run mkdir files to create files folder for password files
+All passwords will be placed into a driectory named files after running unless otherwise specified
 
 words file for word functionality taken from https://github.com/dwyl/english-words
 
 file usages:
-./pmake <key> <save location> [options] : generates a password according to flags given
-			options:
+
+pmake : generates a password according to flags given
+
+	./pmake <key> <save location> [options]
+		options:
 			
 			-s <symbols> : symbols to use [none set by default] 
 			
@@ -28,14 +31,27 @@ file usages:
 			
 			-q: quick setting for my most common options without words -sA -p -g 3 -l 32 
 
-			\n-qW: quick setting for my most common options with words -sA -p -g 3 -l 32 -w 5
+			-qW: quick setting for my most common options with words -sA -p -g 3 -l 32 -w 5
 			
-./precover <key> <save location> <length of password> : recovers padded password
+precover : recovers padded password
 
-./showpass : shows password when not padded
+	 ./precover <key> <save location> <length of password>
 
-./push : allows user to push changes in the program to their own git repos, requires seperate repos for the program and the password files
+pshow : shows password when not padded
 
-./pull : allows user to pull the changes from their own repos, requires  seperate repos for the program and the password files
+	./pshow
 
-all other files are used for development purposes
+push.sh : allows user to push changes in the program to their own git repos, requires seperate repos for the program and the password files
+	
+	./push.sh <optional message>
+
+pull.sh : allows user to pull the changes from their own repos, requires  seperate repos for the program and the password files
+	
+	./pull.sh
+
+makepin.py : copy of pmake for dev purposes
+recoverpin.py : copy of precover for dev purposes
+showpass.py : copy of pshow for dev purposes
+words.txt : list of words, used by pmake with -w switch
+Makefile : makefile for version control
+words.py : py script to control length of words imported to pmake

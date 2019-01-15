@@ -6,7 +6,7 @@ MESSAGE=""
 
 if [ $# -eq 1 ]
 then
-	MESSAGE="$1"
+	MESSAGE=": $1"
 fi
 
 FINALSTR=$NAME$COMMIT$DATE$MESSAGE

@@ -6,3 +6,4 @@ FINALSTR=$NAME$COMMIT$DATE
 echo FINALSTR
 git add . 
 git commit -m '$FINALSTR'
+git push origin master

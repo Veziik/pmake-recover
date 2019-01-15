@@ -4,7 +4,7 @@ DATE=`date`
 COMMIT=" commit " 
 FINALSTR=$NAME$COMMIT$DATE 
 
-echo "starting program commit from $NAME on $DATE\n\n"
+printf "starting program commit from $NAME on $DATE\n\n"
 git add . 
 git commit -m "$FINALSTR"
 git push origin master

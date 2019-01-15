@@ -52,8 +52,13 @@ pull.sh : allows user to pull the changes from their own repos, requires  sepera
 	./pull.sh
 
 makepin.py : copy of pmake for dev purposes
+
 recoverpin.py : copy of precover for dev purposes
+
 showpass.py : copy of pshow for dev purposes
+
 words.txt : list of words, used by pmake with -w switch
+
 Makefile : makefile for version control
+
 words.py : py script to control length of words imported to pmake

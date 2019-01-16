@@ -12,13 +12,13 @@ fi
 FINALSTR=$NAME$COMMIT$DATE$MESSAGE
 
 
-printf "starting program commit and push from $NAME on $DATE...\n"
+printf "\nstarting program commit and push from $NAME on $DATE..."
 git add --all
 git commit -m "$FINALSTR"
 git push origin master
 printf "\n"
 
-printf "starting file commit and push from $NAME on $DATE...\n"
+printf "\nstarting file commit and push from $NAME on $DATE..."
 cd files
 git add --all
 git commit -m "$FINALSTR"

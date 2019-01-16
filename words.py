@@ -7,6 +7,6 @@ def importWords(filename, maxwordlength):
 		for line in file:
 			line = line.replace('\n', '')
 			if maxwordlength == -1 or len(line) <= maxwordlength:
-				newwordlist.append(line)
+				newwordlist.append(line.title())
 
 	return newwordlist

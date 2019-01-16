@@ -145,8 +145,8 @@ def parse():
 			if args[i] == '-q':
 				growthfactor = 3
 				symbols = ''
-				if i+1 < len(args) and '-' not in args[i+1]:
-					symbols = args[i+1]
+				if i+1 < len(args) and not args[i+1].replace('-' , '').isalpha():
+					symbols = args[i+1] 
 				else:
 					symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
 				encrypt = 1
@@ -155,8 +155,8 @@ def parse():
 			elif args[i] == '-qW':
 				growthfactor = 3
 				symbols = ''
-				if i+1 < len(args) and '-' not in args[i+1]:
-					symbols = args[i+1]
+				if i+1 < len(args) and not args[i+1].replace('-' , '').isalpha():
+					symbols = args[i+1] 
 				else:
 					symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
 				encrypt = 1

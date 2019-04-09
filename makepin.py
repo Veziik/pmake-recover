@@ -5,6 +5,7 @@ import hashlib
 import random
 import time
 import struct
+import pyperclip
 from words import *
 
 
@@ -34,12 +35,16 @@ def add_word(words, length):
 		return words_of_a_certain_length[random.randint(0,len(words_of_a_certain_length)-1)]
 
 
-def write_to_file(filename, contents):
+def write_to_file(filename, contents, useClipboard):
 	with open('files/'+filename , 'w') as file:	
 		file.write(contents)
+		if useClipboard > 0:
+			pyperclip.copy(contents)
+		if useClipboard == 2:
+			contents = '[CONTENTS REDACTED]'
 		print('\nnew password: ' + contents + '\nlength: '+ str(len(contents)) + '\nfile: ' + 'files/'+filename + '\npadding: false\nencryption: false')
 
-def write_padded(filename, contents, optional, words, wordlist):
+def write_padded(filename, contents, optional, words, wordlist, useClipboard):
 	front = ''
 	back = ''
 	#print('front: ' + str(seed_trashlength_front()))
@@ -69,6 +74,10 @@ def write_padded(filename, contents, optional, words, wordlist):
 
 	with open('files/' + filename, 'w') as file:
 		file.write(front + contents + back)
+		if useClipboard > 0:
+			pyperclip.copy(contents)
+		if useClipboard == 2:
+			contents = '[CONTENTS REDACTED]'
 		print('\nnew password: ' + contents + '\nlength: '+ str(len(contents)) + '\nfile: ' + 'files/'+filename + '\npadding: true\nencryption: false')
 
 def write_encrypted(filename, contents, trashlen, optional):
@@ -119,11 +128,13 @@ def parse():
 			\n-g <integer> : growth factor, -3 < x < 3, influences length of output, default 0
 			\n-l <integer> : length limit, truncates output to given size, default infinity
 			\n-p: pad, pad with random amount of trash data, false by default
-			\n-e: encrypt, pads and encrypts to bytes, false by default, still in development
-			\n-w: use words instead of letter strings for easier memorization
-			\n-q: quick setting for my most common options without words \'-sA -p -g 3 -l 32 \'
-			\n-qW: quick setting for my most common options with words \'-sA -p -g 3 -l 32 -w 5\'
-			\n-o: do not write to file
+			\n-e: encrypt, pads and encrypts to bytes, false by default, still in development, off by default
+			\n-w: use words instead of letter strings for easier memorization, off by default
+			\n-q: quick setting for my most common options without words \'-sA -p -g 3 -l 32 -cH\'
+			\n-qW: quick setting for my most common options with words \'-sA -p -g 3 -l 32 -w 5 -cH\'
+			\n-o: do not write to file, off by default
+			\n-c: save to clipboard and show output, off by default
+			\n-cH: save to clipboard and hide output, on by default
 			""")
 		sys.exit(0)
 
@@ -138,6 +149,7 @@ def parse():
 	trashlength = 0
 	words = False
 	maxwordlength = -1
+	useClipboard = 2 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 
 	#if True:
 	try:
 		args = sys.argv
@@ -184,12 +196,18 @@ def parse():
 				encrypt = 1
 			elif args[i] == '-e':
 				encrypt = 2
+			elif args[i] == '-o':
+				encrypt = 3
+			elif args[i] == '-c':
+				useClipboard = 1
+			elif args[i] == '-cH':
+				print('arg detected!')
+				useClipboard = 2
 			elif args[i] == '-w':
 				words = True
 				if i+1 < len(args) and '-' not in args[i+1] and not int(args[i+1]) < 1:
 					maxwordlength = int(args[i+1])
-			elif args[i] == '-o':
-				encrypt = 3
+
 
 						
 	except:
@@ -198,7 +216,7 @@ def parse():
 
 
 	#print(trashlength)
-	return (writepath, pinstr, growthfactor, symbols, length, encrypt,words, maxwordlength)
+	return (writepath, pinstr, growthfactor, symbols, length, encrypt,words, maxwordlength, useClipboard)
 
 
 def scramble_hash(pinhash, symbols, growthfactor):
@@ -280,7 +298,7 @@ def print_without_write(contents):
 	print('\nnew password: ' + contents + '\nlength: '+ str(len(contents)) + '\nfile: ' + 'Not written to' + '\npadding: N/A\nencryption: N/A')
 
 def main():
-	(writepath, pinstr, growthfactor, symbols, length, encrypt, words, maxwordlength) = parse()	
+	(writepath, pinstr, growthfactor, symbols, length, encrypt, words, maxwordlength, useClipboard) = parse()	
 	wordlist = ''	
 	pinhash = hashlib.sha256(pinstr.encode('ascii')).hexdigest()
 
@@ -299,9 +317,9 @@ def main():
 		os.makedirs('files')
 
 	if encrypt == 0:
-		write_to_file(writepath, pinhash)
+		write_to_file(writepath, pinhash, useClipboard)
 	elif encrypt == 1:
-		write_padded(writepath, pinhash, symbols, words, wordlist)
+		write_padded(writepath, pinhash, symbols, words, wordlist, useClipboard)
 	elif encrypt == 2:
 		write_encrypted(writepath, pinhash, symbols)
 	elif encrypt == 3:

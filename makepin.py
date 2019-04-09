@@ -38,11 +38,12 @@ def add_word(words, length):
 def write_to_file(filename, contents, useClipboard):
 	with open('files/'+filename , 'w') as file:	
 		file.write(contents)
+		length = str(len(contents))
 		if useClipboard > 0:
 			pyperclip.copy(contents)
 		if useClipboard == 2:
 			contents = '[CONTENTS REDACTED]'
-		print('\nnew password: ' + contents + '\nlength: '+ str(len(contents)) + '\nfile: ' + 'files/'+filename + '\npadding: false\nencryption: false')
+		print('\nnew password: ' + contents + '\nlength: '+ length + '\nfile: ' + 'files/'+filename + '\npadding: false\nencryption: false')
 
 def write_padded(filename, contents, optional, words, wordlist, useClipboard):
 	front = ''
@@ -74,11 +75,12 @@ def write_padded(filename, contents, optional, words, wordlist, useClipboard):
 
 	with open('files/' + filename, 'w') as file:
 		file.write(front + contents + back)
+		length = str(len(contents))
 		if useClipboard > 0:
 			pyperclip.copy(contents)
 		if useClipboard == 2:
 			contents = '[CONTENTS REDACTED]'
-		print('\nnew password: ' + contents + '\nlength: '+ str(len(contents)) + '\nfile: ' + 'files/'+filename + '\npadding: true\nencryption: false')
+		print('\nnew password: ' + contents + '\nlength: '+ length + '\nfile: ' + 'files/'+filename + '\npadding: true\nencryption: false')
 
 def write_encrypted(filename, contents, trashlen, optional):
 	

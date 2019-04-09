@@ -49,7 +49,11 @@ push.sh : allows user to push changes in the program to their own git repos, req
 
 pull.sh : allows user to pull the changes from their own repos, requires  seperate repos for the program and the password files
 	
-	./pull.sh
+	./pull.sh 
+
+list.sh : allows user to search through their files for those which match a given name
+
+	./list.sh <filename>
 
 makepin.py : copy of pmake for dev purposes
 

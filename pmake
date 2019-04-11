@@ -9,95 +9,80 @@ import pyperclip
 from words import *
 
 
-def replace_with_symbol(optional):
-	symbols = '1234567890' + optional
-	return symbols[random.randint(0,len(symbols)-1)]
+def replaceWithSymbol(optionalSymbols):
+	symbolsToSampleFrom = '1234567890' + optionalSymbols
+	return symbolsToSampleFrom[random.randint(0,len(symbolsToSampleFrom)-1)]
 	
 
-def replace_with_alpha():
-	symbols = 'QWERTYUIOPLKJHGFDSAZXCVBNMqwertyuiopasdfghjklzxcvbnm'
-	return symbols[random.randint(0,len(symbols)-1)]
+def replaceWithAlpha():
+	alphasToSampleFrom = 'QWERTYUIOPLKJHGFDSAZXCVBNMqwertyuiopasdfghjklzxcvbnm'
+	return alphasToSampleFrom[random.randint(0,len(alphasToSampleFrom)-1)]
 
-def add_symbol(optional):
-	symbols = '1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM' + optional
-	return symbols[random.randint(0,len(symbols)-1)]
+def addCharacter(optionalSymbols):
+	charactersToSampleFrom = '1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM' + optionalSymbols
+	return charactersToSampleFrom[random.randint(0,len(charactersToSampleFrom)-1)]
 
-def add_word(words, length):
+def addWord(wordlist, length):
 	if length == -1:
-		return words[random.randint(0,len(words)-1)]
+		return wordlist[random.randint(0,len(wordlist)-1)]
 	else:
-		words_of_a_certain_length = []
+		wordsOfACertainLength = []
 
-		for word in words:
+		for word in wordlist:
 			if len(word) <= length:
-				words_of_a_certain_length.append(word)
+				wordsOfACertainLength.append(word)
 
-		return words_of_a_certain_length[random.randint(0,len(words_of_a_certain_length)-1)]
+		return wordsOfACertainLength[random.randint(0,len(wordsOfACertainLength)-1)]
 
 
-def write_to_file(filename, contents, useClipboard):
-	with open('files/'+filename , 'w') as file:	
+def writePlaintextFile(contents, arguments):
+	with open('files/'+arguments['writePath'] , 'w') as file:	
 		file.write(contents)
-		length = str(len(contents))
-		if useClipboard > 0:
+		arguments['length'] = str(len(contents))
+		if arguments['useClipboard'] > 0:
 			pyperclip.copy(contents)
-		if useClipboard == 2:
+		if arguments['useClipboard'] == 2:
 			contents = '[CONTENTS REDACTED]'
-		print('\nnew password: ' + contents + '\nlength: '+ length + '\nfile: ' + 'files/'+filename + '\npadding: false\nencryption: false')
+		print('\nnew password: ' + contents + '\nlength: '+ arguments['length'] + '\nfile: ' + 'files/'+arguments['writePath'] + '\npadding: false\nencryption: false')
 
-def write_padded(filename, contents, optional, words, wordlist, useClipboard):
+def writePaddedFile(contents, wordlist, arguments):
 	front = ''
 	back = ''
-	#print('front: ' + str(seed_trashlength_front()))
-	#print('back: ' + str(seed_trashlength_back()))
-	if not words:
-		for i in range(0, seed_trashlength_front()): 
-			front += add_symbol(optional)
+	#print('front: ' + str(seedFrontTrashlength()))
+	#print('back: ' + str(seedBackTrashlength()))
+	if not arguments['words']:
+		for i in range(0, seedFrontTrashlength()): 
+			front += addCharacter(arguments['symbols'])
 		
-		for i in range(0, seed_trashlength_back()): 
-			back += add_symbol(optional)
+		for i in range(0, seedBackTrashlength()): 
+			back += addCharacter(arguments['symbols'])
 	else:
-		frontlen = seed_trashlength_front()
+		frontlen = seedFrontTrashlength()
 		while len(front) < frontlen:
 			if random.randint(1,6) >= 4:
-				front += add_word(wordlist, frontlen - len(front))
+				front += addWord(wordlist, frontlen - len(front))
 			else:
-				front += replace_with_symbol(optional)
+				front += replaceWithSymbol(arguments['symbols'])
 		front = front[0:frontlen]
 
-		backlen = seed_trashlength_back()
+		backlen = seedBackTrashlength()
 		while len(back) < backlen:
 			if random.randint(1,6) >= 4:
-				back += add_word(wordlist, backlen - len(back))
+				back += addWord(wordlist, backlen - len(back))
 			else:
-				back += replace_with_symbol(optional)
+				back += replaceWithSymbol(arguments['symbols'])
 		back = front[0:backlen]
 
-	with open('files/' + filename, 'w') as file:
+	with open('files/' + arguments['writePath'], 'w') as file:
 		file.write(front + contents + back)
-		length = str(len(contents))
-		if useClipboard > 0:
+		arguments['length'] = str(len(contents))
+		if arguments['useClipboard'] > 0:
 			pyperclip.copy(contents)
-		if useClipboard == 2:
+		if arguments['useClipboard'] == 2:
 			contents = '[CONTENTS REDACTED]'
-		print('\nnew password: ' + contents + '\nlength: '+ length + '\nfile: ' + 'files/'+filename + '\npadding: true\nencryption: false')
+		print('\nnew password: ' + contents + '\nlength: '+ arguments['length'] + '\nfile: ' + 'files/'+arguments['writePath'] + '\npadding: true\nencryption: false')
 
-def write_encrypted(filename, contents, trashlen, optional):
-	
-	front = ''
-	for i in range(0, trashlen): 
-		front += add_symbol(optional)
-	back = ''
-	for i in range(0, trashlen): 
-		back += add_symbol(optional)
-
-	with open('files/' + filename, 'wb') as file:
-		full = front + contents + back
-		for char in full:
-			file.write(struct.pack('!i', ord(char)))
-		print('\nnew password: ' + contents + '\nlength: '+ str(len(contents)) + '\nfile: ' + 'files/'+filename + '\npadding: true\nencryption: true')
-
-def seed_trashlength_front():
+def seedFrontTrashlength():
 	sum1 = 0
 	for letter in sys.argv[1]:
 		sum1 += ord(letter)
@@ -108,7 +93,7 @@ def seed_trashlength_front():
 
 	return (sum1 ^ sum2)
 
-def seed_trashlength_back():
+def seedBackTrashlength():
 	sum1 = 0
 	for letter in sys.argv[1]:
 		sum1 -= ord(letter)
@@ -124,14 +109,14 @@ def parse():
 	if len(sys.argv) < 3:
 		print("""\nusage: """ + sys.argv[0] + """ <key> <save location> [options]
 			\noptions:
-			\n-s <symbols> : symbols to use [none set by default] 
+			\n-s <string> : symbols to use [none set by default] 
 			\n-sA: use set of all possible non-numeric, non alphabetic ascii symbols 
-			\n-sR <symbols>: use all symbols, except those in parameter
+			\n-sR <string>: use all symbols, except those in parameter
 			\n-g <integer> : growth factor, -3 < x < 3, influences length of output, default 0
 			\n-l <integer> : length limit, truncates output to given size, default infinity
 			\n-p: pad, pad with random amount of trash data, false by default
-			\n-e: encrypt, pads and encrypts to bytes, false by default, still in development, off by default
-			\n-w: use words instead of letter strings for easier memorization, off by default
+			\n-e: encrypt, pads and encrypts to bytes, false by default, still in development
+			\n-w: use words instead of random letter strings for easier memorization, off by default
 			\n-q: quick setting for my most common options without words \'-sA -p -g 3 -l 32 -cH\'
 			\n-qW: quick setting for my most common options with words \'-sA -p -g 3 -l 32 -w 5 -cH\'
 			\n-o: do not write to file, off by default
@@ -141,74 +126,73 @@ def parse():
 		sys.exit(0)
 
 	
-
-	writepath = sys.argv[2]# + '.card'
-	pinstr = sys.argv[2]+sys.argv[1]
-	growthfactor = 0
-	symbols = ''
-	length = -1
-	encrypt = 0
-	trashlength = 0
-	words = False
-	maxwordlength = -1
-	useClipboard = 2 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 
+	arguments = dict()
+	arguments['writePath'] = sys.argv[2]# + '.card'
+	arguments['pinstr'] = sys.argv[2]+sys.argv[1]
+	arguments['growthFactor'] = 0
+	arguments['symbols'] = ''
+	arguments['length'] = -1
+	arguments['encrypt'] = 0
+	arguments['words'] = False
+	arguments['maxWordLength'] = -1
+	arguments['useClipboard'] = 2 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 
 	#if True:
 	try:
 		args = sys.argv
 		for i in range(0, len(args)):
 			if args[i] == '-q':
-				growthfactor = 3
-				symbols = ''
+				arguments['growthFactor'] = 3
+				arguments['symbols'] = ''
 				if i+1 < len(args) and not args[i+1].replace('-' , '').isalpha():
-					symbols = args[i+1] 
+					arguments['symbols'] = args[i+1] 
 				else:
-					symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
-				encrypt = 1
-				length = 32
+					arguments['symbols'] = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
+				arguments['encrypt'] = 1
+				arguments['length'] = 32
 
 			elif args[i] == '-qW':
-				growthfactor = 3
-				symbols = ''
+				arguments['growthFactor'] = 3
+				arguments['symbols'] = ''
 				if i+1 < len(args) and not args[i+1].replace('-' , '').isalpha():
-					symbols = args[i+1] 
+					arguments['symbols'] = args[i+1] 
 				else:
-					symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
-				encrypt = 1
-				length = 16
-				words = True
-				maxwordlength = 4
+					arguments['symbols'] = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
+				arguments['encrypt'] = 1
+				arguments['length'] = 16
+				arguments['words'] = True
+				arguments['maxWordLength'] = 4
 			elif args[i] == '-g':
-				growthfactor = int(args[i+1])
-				if growthfactor > 3 or growthfactor < -3:
+				arguments['growthFactor'] = int(args[i+1])
+				if arguments['growthFactor'] > 3 or arguments['growthFactor'] < -3:
 					exit(1)
 			elif args[i] == '-s':
-				symbols = args[i+1]
-				symbols = symbols.replace('\'', '')
+				arguments['symbols'] = args[i+1]
+				arguments['symbols'] = arguments['symbols'].replace('\'', '')
 			elif args[i] == '-sR':
-				symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
+				arguments['symbols'] = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
 				taboos = args[i+1]
 				taboos = taboos.replace('\'', '')
 				for taboo in taboos:
-					symbols = symbols.replace(taboo, '')
+					arguments['symbols'] = arguments['symbols'].replace(taboo, '')
 			elif args[i] == '-sA':
-				symbols = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
+				arguments['symbols'] = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
 			elif args[i] == '-l':
-				length = int(args[i+1])
+				arguments['length'] = int(args[i+1])
 			elif args[i] == '-p':
-				encrypt = 1
+				arguments['encrypt'] = 1
 			elif args[i] == '-e':
-				encrypt = 2
+				arguments['encrypt'] = 2
 			elif args[i] == '-o':
-				encrypt = 3
+				arguments['encrypt'] = 3
 			elif args[i] == '-c':
-				useClipboard = 1
+				arguments['useClipboard'] = 1
 			elif args[i] == '-cH':
 				print('arg detected!')
-				useClipboard = 2
+				arguments['useClipboard'] = 2
 			elif args[i] == '-w':
-				words = True
+				arguments['words'] = True
 				if i+1 < len(args) and '-' not in args[i+1] and not int(args[i+1]) < 1:
-					maxwordlength = int(args[i+1])
+					arguments['maxWordLength'] = int(args[i+1])
 
 
 						
@@ -217,50 +201,52 @@ def parse():
 	 	exit(1)	
 
 
-	#print(trashlength)
-	return (writepath, pinstr, growthfactor, symbols, length, encrypt,words, maxwordlength, useClipboard)
+	return arguments
 
 
-def scramble_hash(pinhash, symbols, growthfactor):
+def scrambleWithCharacters(pinhash,arguments):
 	i = 0
 	while i < len(pinhash):
 		random.seed((time.time()-10000)+i)
 		if pinhash[i].isalpha():
 			if random.randint(1,6) >= 2:
-				pinhash = pinhash[i+1:len(pinhash)] + replace_with_alpha() + pinhash[0:i] 
+				pinhash = pinhash[i+1:len(pinhash)] + replaceWithAlpha() + pinhash[0:i] 
 		random.seed((time.time()-100000)+i)
 		if pinhash[i].isdigit():
 			if random.randint(1,6) >= 2:
-				pinhash =  pinhash[i+1:len(pinhash)] + replace_with_symbol(symbols) + pinhash[0:i]
+				pinhash =  pinhash[i+1:len(pinhash)] + replaceWithSymbol(arguments['symbols']) + pinhash[0:i]
 		random.seed((time.time()-1000000)+i)
-		if random.randint(1,6) >= 5 - growthfactor :#and random.randint(1,6) != 1:
-			pinhash =  pinhash + add_symbol(symbols)
+		if random.randint(1,6) >= 5 - arguments['growthFactor'] :#and random.randint(1,6) != 1:
+			pinhash =  pinhash + addCharacter(arguments['symbols'])
 		random.seed((time.time()-10000000)+i)
-		if random.randint(1,6) <= 2 - growthfactor :#and random.randint(1,6) != 6:
+		if random.randint(1,6) <= 2 - arguments['growthFactor'] :#and random.randint(1,6) != 6:
 			pinhash =  pinhash[0:len(pinhash)-1]
 		i+=1
+		
+	if arguments['length'] != -1:
+		pinhash = pinhash[0:arguments['length']]
 
 	return pinhash
 
 
-def scramble_words(pinhash, symbols, length, growthfactor, wordlist):
+def scrambleWithWords(pinhash, arguments, wordlist):
 	newpass = ''
 	stop = False
 	i = 0
 
 
 
-	if length == -1:
+	if arguments['length'] == -1:
 		while (not stop) and (i < len(pinhash)):
 			random.seed((time.time()-10000)+i)
 			if random.randint(1,6) >= 4:
 				if pinhash[i].isalpha():
-					newword = add_word(wordlist, length).capitalize()
+					newword = addWord(wordlist, arguments['maxWordLength']).capitalize()
 					newpass = newpass + newword 
 				
 				elif(pinhash[i].isdigit()):
 					if random.randint(1,6) >= 2:
-						newpass = newpass + replace_with_symbol(symbols)
+						newpass = newpass + replaceWithSymbol(arguments['symbols'])
 					else:
 						newpass = newpass + pinhash[i]
 			if random.randint(1,6) >= 2:
@@ -271,60 +257,52 @@ def scramble_words(pinhash, symbols, length, growthfactor, wordlist):
 			i = i+1
 	else:
 		
-		while len(newpass) < length :
+		while len(newpass) < arguments['length'] :
 			random.seed((time.time()-100)+i)
 			if random.randint(1,6) >=4:
 				if pinhash[i].isalpha():
 				
-					newword = add_word(wordlist, length - len(newpass)+1).capitalize()
+					newword = addWord(wordlist, arguments['length'] - len(newpass)+1).capitalize()
 					
 					newpass = newpass + newword
 				elif(pinhash[i].isdigit()):
 					if random.randint(1,6) >= 2:
-						newpass = newpass + replace_with_symbol(symbols)
+						newpass = newpass + replaceWithSymbol(arguments['symbols'])
 					else:
 						newpass = newpass + pinhash[i]
 			random.seed((time.time()-10000)+i)
 			if random.randint(1,6) >= 4 :
 				pinhash = pinhash[int(len(pinhash)/2):int(len(pinhash))] + pinhash[0:int((len(pinhash)/2))]			
 			i = i + 1 
-		newpass = newpass[0:length]
+		newpass = newpass[0:arguments['length']]
 
 	
 	return newpass
 
-def truncate(pinhash, length):
-	return pinhash[0:length]
-
-def print_without_write(contents):
-	print('\nnew password: ' + contents + '\nlength: '+ str(len(contents)) + '\nfile: ' + 'Not written to' + '\npadding: N/A\nencryption: N/A')
+def printWithoutWriting(contents):
+	print('\nnew password: ' + contents + '\nlength'+ arguments['length'] + '\nfile: ' + 'none' + '\npadding: true\nencryption: false')
 
 def main():
-	(writepath, pinstr, growthfactor, symbols, length, encrypt, words, maxwordlength, useClipboard) = parse()	
+	arguments = parse()	
 	wordlist = ''	
-	pinhash = hashlib.sha256(pinstr.encode('ascii')).hexdigest()
+	pinhash = hashlib.sha256(arguments['pinstr'].encode('ascii')).hexdigest()
 
-	if words:
-		wordlist = importWords('words.txt', maxwordlength)
-		pinhash = scramble_words(pinhash,symbols, length, growthfactor, wordlist)
+	if arguments['words']:
+		wordlist = importWords('words.txt', arguments['maxWordLength'])
+		pinhash = scrambleWithWords(pinhash,arguments, wordlist)
 		
 	else:
 	
-		pinhash = scramble_hash(pinhash,symbols,growthfactor)
-
-		if length != -1 and len(pinhash) > length:
-			pinhash = truncate(pinhash, length)
+		pinhash = scrambleWithCharacters(pinhash,arguments)
 
 	if not os.path.exists('files'):
 		os.makedirs('files')
 
-	if encrypt == 0:
-		write_to_file(writepath, pinhash, useClipboard)
-	elif encrypt == 1:
-		write_padded(writepath, pinhash, symbols, words, wordlist, useClipboard)
-	elif encrypt == 2:
-		write_encrypted(writepath, pinhash, symbols)
-	elif encrypt == 3:
-		print_without_write(pinhash)
+	if arguments['encrypt'] == 0:
+		writePlaintextFile(pinhash, arguments)
+	elif arguments['encrypt'] == 1 or arguments['encrypt'] == 2:
+		writePaddedFile(pinhash, wordlist, arguments)
+	elif arguments['encrypt'] == 3:
+		printWithoutWriting(pinhash)
 
 main()

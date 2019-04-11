@@ -55,8 +55,13 @@ def pull_bytes(arguments):
 		contents = file.read()
 		for line in contents:
 			print(str(struct.unpack('!i',line)) + str(num))
-
-		print('\nrecovered: ' + contents[arguments['trashLength']:arguments['trashLength']+arguments['length']])
+		recovered = contents[arguments['trashLength']:arguments['trashLength']+arguments['length']]
+		if not arguments['showPass']:
+			pyperclip.copy(recovered)
+			print('\nPassword Copied to Clipboard, Try not to paste prematurely')
+		else:
+			print('\nrecovered: ' + recovered)
+		
 
 def main():
 

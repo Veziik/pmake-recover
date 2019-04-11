@@ -6,6 +6,7 @@ import random
 import time
 import struct
 import pyperclip
+#from cryptography import Fernet
 from words import *
 
 
@@ -103,6 +104,9 @@ def seedBackTrashlength():
 		sum2 += ord(letter)
 
 	return abs(~(sum1 & sum2))
+
+def encryptString(arguments):
+	pass
 
 def parse():
 

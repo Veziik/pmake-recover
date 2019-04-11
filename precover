@@ -27,13 +27,13 @@ def parse():
 	arguments['writePath'] = sys.argv[2] #+ '.card'
 	arguments['trashLength'] = seed_trashlength(sys.argv[1], sys.argv[2])
 	arguments['length']= int(sys.argv[3])
-	arguments['inbytes']= 0
+	arguments['encrypted']= False 
 	arguments['showPass'] = False
 	
 	
 	for i in range(0, len(sys.argv)):
 		if sys.argv[i] == '-e':
-			arguments['inbytes'] = 1
+			arguments['encrypted'] = 1
 		if sys.argv[i] == '-s':
 			arguments['showPass'] = True
 
@@ -45,20 +45,7 @@ def pull(arguments):
 		recovered = contents[arguments['trashLength']:arguments['trashLength']+arguments['length']]
 		if not arguments['showPass']:
 			pyperclip.copy(recovered)
-			print('\nPassword Copied to Clipboard, Try not to paste prematurely')
-		else:
-			print('\nrecovered: ' + recovered)
-
-def pull_bytes(arguments):
-	num = 0
-	with open('files/'+arguments['writePath'], 'rb') as file:
-		contents = file.read()
-		for line in contents:
-			print(str(struct.unpack('!i',line)) + str(num))
-		recovered = contents[arguments['trashLength']:arguments['trashLength']+arguments['length']]
-		if not arguments['showPass']:
-			pyperclip.copy(recovered)
-			print('\nPassword Copied to Clipboard, Try not to paste prematurely')
+			print('\nPassword recovered and copied to clipboard, Try not to paste prematurely\n')
 		else:
 			print('\nrecovered: ' + recovered)
 		
@@ -67,10 +54,9 @@ def main():
 
 	arguments = parse()
 	
-	if arguments['inbytes'] == 0:
-		pull(arguments)
-	if arguments['inbytes'] == 1:
-		pull_bytes(arguments)
+	if arguments['encrypted']:
+		decrypt(arguments)
+	pull(arguments)
 
 
 

@@ -58,6 +58,7 @@ def main():
 		decrypt(arguments)
 	pull(arguments)
 
-
-
-main()
+if  __name__ == '__main__':
+	main()
+else:
+	print('no main')

@@ -309,4 +309,7 @@ def main():
 	elif arguments['encrypt'] == 3:
 		printWithoutWriting(pinhash)
 
-main()
+if  __name__ == '__main__':
+	main()
+else:
+	print('no main')

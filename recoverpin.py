@@ -1,10 +1,11 @@
 #! /usr/bin/env python3
 import sys
+import platform
 import struct
-import pyperclip
 import hashlib
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
+import pyperclip
 
 def seedFrontTrashlength():
 	sum1 = 0
@@ -36,7 +37,8 @@ def parse():
 	if len(sys.argv) < 4:
 		print("""\nusage: """ +sys.argv[0] + """ <key> <save location> <length>
 			-s: show recovered password in shell, off be default
-			-e: recover from encrypted file, off by default""")
+			-e: recover from encrypted file, on by default
+			-eN: recover from non-ecrypted padded file, off by defaut""")
 		sys.exit(0)
 
 	arguments = dict()

@@ -2,17 +2,34 @@
 import sys
 import struct
 import pyperclip
+import hashlib
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 
-def seed_trashlength(key, path):
+def seedFrontTrashlength():
 	sum1 = 0
-	for letter in key:
+	for letter in sys.argv[1]:
 		sum1 += ord(letter)
 
 	sum2 = 0
-	for letter in path:
+	for letter in sys.argv[2]:
 		sum2 += ord(letter)
 
 	return (sum1 ^ sum2)
+
+
+def createIV(arguments):
+	hashable1 = arguments['key'] + arguments['writePath']
+	return hashlib.sha256(hashable1.encode('utf-8')).hexdigest()[0:16]
+
+def decryptString(arguments, string):
+	backend = default_backend()
+	key = arguments['key']
+	iv = createIV(arguments)
+	cipher = Cipher(algorithms.AES(key.encode('utf-8')), modes.CBC(iv.encode('utf-8')), backend=backend)
+	decryptor = cipher.decryptor()
+	plaintext = decryptor.update(string) + decryptor.finalize()
+	return str(plaintext, 'utf-8')
 
 def parse():
 
@@ -25,23 +42,39 @@ def parse():
 	arguments = dict()
 
 	arguments['writePath'] = sys.argv[2] #+ '.card'
-	arguments['trashLength'] = seed_trashlength(sys.argv[1], sys.argv[2])
+	arguments['trashLength'] = seedFrontTrashlength()
 	arguments['length']= int(sys.argv[3])
-	arguments['encrypted']= False 
+	arguments['encrypted']= True
+	arguments['key'] = hashlib.sha256(sys.argv[1].encode('ascii')).hexdigest()[0:32]
 	arguments['showPass'] = False
 	
 	
+	
 	for i in range(0, len(sys.argv)):
+		if sys.argv[i] == '-eN':
+			arguments['encrypted'] = False
 		if sys.argv[i] == '-e':
-			arguments['encrypted'] = 1
+			arguments['encrypted'] = True
 		if sys.argv[i] == '-s':
 			arguments['showPass'] = True
 
 	return arguments
 
 def pull(arguments):
-	with open('files/' + arguments['writePath'], 'r') as file:
+	readProtocol = 'r'
+	fileExtension = '.pad'
+	if arguments['encrypted']:
+		readProtocol = 'rb'
+		fileExtension = '.enc'
+	with open('files/' + arguments['writePath']+fileExtension, readProtocol) as file:
 		contents = file.read()
+
+		if arguments['encrypted']:
+			contents = decryptString(arguments,contents)
+
+		#print(arguments['trashLength'])
+		#print(contents)
+		
 		recovered = contents[arguments['trashLength']:arguments['trashLength']+arguments['length']]
 		if not arguments['showPass']:
 			pyperclip.copy(recovered)
@@ -52,10 +85,7 @@ def pull(arguments):
 
 def main():
 
-	arguments = parse()
-	
-	if arguments['encrypted']:
-		decrypt(arguments)
+	arguments = parse()		
 	pull(arguments)
 
 if  __name__ == '__main__':

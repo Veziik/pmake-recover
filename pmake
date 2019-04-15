@@ -6,7 +6,8 @@ import random
 import time
 import struct
 import pyperclip
-#from cryptography import Fernet
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 from words import *
 
 
@@ -35,30 +36,59 @@ def addWord(wordlist, length):
 
 		return wordsOfACertainLength[random.randint(0,len(wordsOfACertainLength)-1)]
 
+def createIV(arguments):
+	hashable1 = arguments['key'] + arguments['fileName']
+	return hashlib.sha256(hashable1.encode('utf-8')).hexdigest()[0:16]
+
+def encryptString(arguments, string):
+	#print('\n\n\n OFFSET:' + str(len(string)%16) + ' \n\n\n')
+	offset = len(string)%16
+	string = string[0:(len(string)-offset)]
+	backend = default_backend()
+	key = arguments['key']
+	iv = createIV(arguments)
+	cipher = Cipher(algorithms.AES(key.encode('utf-8')), modes.CBC(iv.encode('utf-8')), backend=backend)
+	encryptor = cipher.encryptor()
+	ct = encryptor.update(string.encode('utf-8')) + encryptor.finalize()
+	return ct
 
 def writePlaintextFile(contents, arguments):
-	with open('files/'+arguments['writePath'] , 'w') as file:	
+	with open('files/'+arguments['fileName'] + '.txt' , 'w') as file:	
 		file.write(contents)
 		arguments['length'] = str(len(contents))
 		if arguments['useClipboard'] > 0:
 			pyperclip.copy(contents)
 		if arguments['useClipboard'] == 2:
 			contents = '[CONTENTS REDACTED]'
-		print('\nnew password: ' + contents + '\nlength: '+ arguments['length'] + '\nfile: ' + 'files/'+arguments['writePath'] + '\npadding: false\nencryption: false')
+		print('\nnew password: ' + contents + '\nlength: '+ arguments['length'] + '\nfile: ' + 'files/'+arguments['fileName'] + '\npadding: false\nencryption: false')
 
 def writePaddedFile(contents, wordlist, arguments):
 	front = ''
 	back = ''
+	writeProtocol = 'w'
+	fileExtension ='.pad'
 	#print('front: ' + str(seedFrontTrashlength()))
 	#print('back: ' + str(seedBackTrashlength()))
+	frontlen = seedFrontTrashlength()
+	backlen = seedBackTrashlength()
+	
+	if os.path.isfile('files/'+arguments['fileName'] + '.pad'):
+		os.remove('files/'+arguments['fileName'] + '.pad')
+	if os.path.isfile(arguments['fileName'] + '.enc'):
+		os.remove('files/'+arguments['fileName'] + '.enc')
+
+	while (frontlen + arguments['length'] + backlen) % 16 != 0:
+		backlen += 1
+
+
 	if not arguments['words']:
-		for i in range(0, seedFrontTrashlength()): 
+		for i in range(0, frontlen): 
 			front += addCharacter(arguments['symbols'])
 		
-		for i in range(0, seedBackTrashlength()): 
+		for i in range(0, backlen): 
 			back += addCharacter(arguments['symbols'])
 	else:
-		frontlen = seedFrontTrashlength()
+
 		while len(front) < frontlen:
 			if random.randint(1,6) >= 4:
 				front += addWord(wordlist, frontlen - len(front))
@@ -66,22 +96,32 @@ def writePaddedFile(contents, wordlist, arguments):
 				front += replaceWithSymbol(arguments['symbols'])
 		front = front[0:frontlen]
 
-		backlen = seedBackTrashlength()
 		while len(back) < backlen:
 			if random.randint(1,6) >= 4:
 				back += addWord(wordlist, backlen - len(back))
 			else:
 				back += replaceWithSymbol(arguments['symbols'])
-		back = front[0:backlen]
+		back = back[0:backlen]
 
-	with open('files/' + arguments['writePath'], 'w') as file:
-		file.write(front + contents + back)
+	
+	finalBlockOfText = (front + contents + back)	
+
+	#print(frontlen)
+	#print(finalBlockOfText)
+
+	if arguments['encrypt'] == 2:
+		writeProtocol = 'wb'
+		fileExtension = '.enc'
+		finalBlockOfText = encryptString(arguments, finalBlockOfText)
+
+	with open('files/' + arguments['fileName'] + fileExtension, writeProtocol) as file:
+		file.write(finalBlockOfText)
 		arguments['length'] = str(len(contents))
 		if arguments['useClipboard'] > 0:
 			pyperclip.copy(contents)
 		if arguments['useClipboard'] == 2:
 			contents = '[CONTENTS REDACTED]'
-		print('\nnew password: ' + contents + '\nlength: '+ arguments['length'] + '\nfile: ' + 'files/'+arguments['writePath'] + '\npadding: true\nencryption: false')
+		print('\nnew password: ' + contents + '\nlength: '+ arguments['length'] + '\nfile: ' + 'files/'+arguments['fileName'] + '\npadding: true\nencryption: false')
 
 def seedFrontTrashlength():
 	sum1 = 0
@@ -104,9 +144,6 @@ def seedBackTrashlength():
 		sum2 += ord(letter)
 
 	return abs(~(sum1 & sum2))
-
-def encryptString(arguments):
-	pass
 
 def parse():
 
@@ -131,12 +168,13 @@ def parse():
 
 	
 	arguments = dict()
-	arguments['writePath'] = sys.argv[2]# + '.card'
+	arguments['fileName'] = sys.argv[2]# + '.card'
 	arguments['pinstr'] = sys.argv[2]+sys.argv[1]
 	arguments['growthFactor'] = 0
 	arguments['symbols'] = ''
 	arguments['length'] = -1
-	arguments['encrypt'] = 0
+	arguments['encrypt'] = 2
+	arguments['key'] = hashlib.sha256(sys.argv[1].encode('ascii')).hexdigest()[0:32]
 	arguments['words'] = False
 	arguments['maxWordLength'] = -1
 	arguments['useClipboard'] = 2 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 
@@ -151,7 +189,7 @@ def parse():
 					arguments['symbols'] = args[i+1] 
 				else:
 					arguments['symbols'] = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
-				arguments['encrypt'] = 1
+				arguments['encrypt'] = 2
 				arguments['length'] = 32
 
 			elif args[i] == '-qW':
@@ -161,7 +199,7 @@ def parse():
 					arguments['symbols'] = args[i+1] 
 				else:
 					arguments['symbols'] = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
-				arguments['encrypt'] = 1
+				arguments['encrypt'] = 2
 				arguments['length'] = 16
 				arguments['words'] = True
 				arguments['maxWordLength'] = 4

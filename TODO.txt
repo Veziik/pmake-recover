@@ -1,0 +1,1 @@
+Determine the best way to run ay sort of code on android, even if it isn't python, native Java is probably better

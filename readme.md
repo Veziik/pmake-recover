@@ -1,6 +1,6 @@
 # pmake-recover
 
-Requirements: pyperclip and python cryptograpy (not pycrypto)
+Requirements: pyperclip and python3-cryptograpy (not pycrypto)
 
 A fast and easy password generator that was coded up in about three days of casual coding. Continually updated throughout the months to add features and streamline code. Not at all secure, though it does a good job of looking random
 

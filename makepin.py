@@ -60,7 +60,7 @@ def writePlaintextFile(contents, arguments):
 			pyperclip.copy(contents)
 		if arguments['useClipboard'] == 2:
 			contents = '[CONTENTS REDACTED]'
-		print('\nnew password: ' + contents + '\nlength: '+ arguments['length'] + '\nfile: ' + 'files/'+arguments['fileName'] + '\npadding: false\nencryption: false')
+		print('\nnew password: ' + contents + '\nlength: '+ arguments['length'] + '\nfile: ' + 'files/'+arguments['fileName'] + '\npadding: False\nencryption: False')
 
 def writePaddedFile(contents, wordlist, arguments):
 	front = ''
@@ -109,10 +109,12 @@ def writePaddedFile(contents, wordlist, arguments):
 	#print(frontlen)
 	#print(finalBlockOfText)
 
+	textEncrypted = False
 	if arguments['encrypt'] == 2:
 		writeProtocol = 'wb'
 		fileExtension = '.enc'
 		finalBlockOfText = encryptString(arguments, finalBlockOfText)
+		textEncrypted = True
 
 	with open('files/' + arguments['fileName'] + fileExtension, writeProtocol) as file:
 		file.write(finalBlockOfText)
@@ -121,7 +123,7 @@ def writePaddedFile(contents, wordlist, arguments):
 			pyperclip.copy(contents)
 		if arguments['useClipboard'] == 2:
 			contents = '[CONTENTS REDACTED]'
-		print('\nnew password: ' + contents + '\nlength: '+ arguments['length'] + '\nfile: ' + 'files/'+arguments['fileName'] + '\npadding: true\nencryption: false')
+		print('\nnew password: ' + contents + '\nlength: '+ arguments['length'] + '\nfile: ' + 'files/'+arguments['fileName'] + '\npadding: True\nencryption: ' + str(textEncrypted))
 
 def seedFrontTrashlength():
 	sum1 = 0

@@ -165,6 +165,7 @@ def parse():
 			\n-o: do not write to file, off by default
 			\n-c: save to clipboard and show output, off by default
 			\n-cH: save to clipboard and hide output, on by default
+			\n-cN: don't save to clipboard, on by default
 			""")
 		sys.exit(0)
 
@@ -228,10 +229,11 @@ def parse():
 				arguments['encrypt'] = 2
 			elif args[i] == '-o':
 				arguments['encrypt'] = 3
+			elif args[i] == '-cN':
+				arguments['useClipboard'] = 0
 			elif args[i] == '-c':
 				arguments['useClipboard'] = 1
 			elif args[i] == '-cH':
-				print('arg detected!')
 				arguments['useClipboard'] = 2
 			elif args[i] == '-w':
 				arguments['words'] = True

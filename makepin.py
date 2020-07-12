@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import os
+import platform
 import hashlib
 import random
 import time
@@ -180,7 +181,11 @@ def parse():
 	arguments['key'] = hashlib.sha256(sys.argv[1].encode('ascii')).hexdigest()[0:32]
 	arguments['words'] = False
 	arguments['maxWordLength'] = -1
-	arguments['useClipboard'] = 2 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 
+	if 'microsoft' in platform.platform().lower():
+		arguments['useClipboard'] = 0 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 
+	else:
+		arguments['useClipboard'] = 2
+
 	#if True:
 	try:
 		args = sys.argv

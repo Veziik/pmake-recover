@@ -181,10 +181,7 @@ def parse():
 	arguments['key'] = hashlib.sha256(sys.argv[1].encode('ascii')).hexdigest()[0:32]
 	arguments['words'] = False
 	arguments['maxWordLength'] = -1
-	if 'microsoft' in platform.platform().lower():
-		arguments['useClipboard'] = 0 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 
-	else:
-		arguments['useClipboard'] = 2
+	arguments['useClipboard'] = 2 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 		
 
 	#if True:
 	try:
@@ -244,13 +241,14 @@ def parse():
 				arguments['words'] = True
 				if i+1 < len(args) and '-' not in args[i+1] and not int(args[i+1]) < 1:
 					arguments['maxWordLength'] = int(args[i+1])
-
-
 						
 	except:
 	 	print('arguments missing or formatted incorrectly')
 	 	exit(1)	
 
+	if 'microsoft-x86_64-with-ubuntu' in platform.platform().lower():
+		print("Windows Subsystem for Linux detected, showing cleartext")
+		arguments['useClipboard'] = 0 
 
 	return arguments
 

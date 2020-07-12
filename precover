@@ -6,6 +6,7 @@ import hashlib
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 import pyperclip
+import platform
 
 def seedFrontTrashlength():
 	sum1 = 0
@@ -50,8 +51,6 @@ def parse():
 	arguments['key'] = hashlib.sha256(sys.argv[1].encode('ascii')).hexdigest()[0:32]
 	arguments['showPass'] = False
 	
-	
-	
 	for i in range(0, len(sys.argv)):
 		if sys.argv[i] == '-eN':
 			arguments['encrypted'] = False
@@ -59,6 +58,10 @@ def parse():
 			arguments['encrypted'] = True
 		if sys.argv[i] == '-s':
 			arguments['showPass'] = True
+
+	if 'microsoft-x86_64-with-ubuntu' in platform.platform().lower():
+		print("Windows Subsystem for Linux detected, showing cleartext")
+		arguments['showPass'] = True
 
 	return arguments
 

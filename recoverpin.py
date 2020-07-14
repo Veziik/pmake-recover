@@ -51,7 +51,7 @@ def parse():
 	arguments['key'] = hashlib.sha256(sys.argv[1].encode('ascii')).hexdigest()[0:32]
 	arguments['showPass'] = False
 	
-	for i in range(0, len(sys.argv)):
+	for i in range(4, len(sys.argv)):
 		if sys.argv[i] == '-eN':
 			arguments['encrypted'] = False
 		if sys.argv[i] == '-e':

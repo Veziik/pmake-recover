@@ -174,19 +174,19 @@ def parse():
 	arguments = dict()
 	arguments['fileName'] = sys.argv[2]# + '.card'
 	arguments['pinstr'] = sys.argv[2]+sys.argv[1]
-	arguments['growthFactor'] = 0
-	arguments['symbols'] = ''
-	arguments['length'] = -1
+	arguments['growthFactor'] = 3
+	arguments['symbols'] = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
+	arguments['length'] = 16
 	arguments['encrypt'] = 2
 	arguments['key'] = hashlib.sha256(sys.argv[1].encode('ascii')).hexdigest()[0:32]
-	arguments['words'] = False
-	arguments['maxWordLength'] = -1
+	arguments['words'] = True
+	arguments['maxWordLength'] = 4
 	arguments['useClipboard'] = 2 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 		
 
 	#if True:
 	try:
 		args = sys.argv
-		for i in range(0, len(args)):
+		for i in range(3, len(args)):
 			if args[i] == '-q':
 				arguments['growthFactor'] = 3
 				arguments['symbols'] = ''

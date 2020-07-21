@@ -54,7 +54,7 @@ def encryptString(arguments, string):
 	return ct
 
 def writePlaintextFile(contents, arguments):
-	with open('files/'+arguments['fileName'] + '.txt' , 'w') as file:	
+	with open('files/'+arguments['fileName'] + arguments['fileExtension'] , 'w') as file:	
 		file.write(contents)
 		arguments['length'] = str(len(contents))
 		if arguments['useClipboard'] > 0:
@@ -67,7 +67,6 @@ def writePaddedFile(contents, wordlist, arguments):
 	front = ''
 	back = ''
 	writeProtocol = 'w'
-	fileExtension ='.pad'
 	#print('front: ' + str(seedFrontTrashlength()))
 	#print('back: ' + str(seedBackTrashlength()))
 	frontlen = seedFrontTrashlength()
@@ -113,11 +112,10 @@ def writePaddedFile(contents, wordlist, arguments):
 	textEncrypted = False
 	if arguments['encrypt'] == 2:
 		writeProtocol = 'wb'
-		fileExtension = '.enc'
 		finalBlockOfText = encryptString(arguments, finalBlockOfText)
 		textEncrypted = True
 
-	with open('files/' + arguments['fileName'] + fileExtension, writeProtocol) as file:
+	with open('files/' + arguments['fileName'] + arguments['fileExtension'], writeProtocol) as file:
 		file.write(finalBlockOfText)
 		arguments['length'] = str(len(contents))
 		if arguments['useClipboard'] > 0:
@@ -163,7 +161,8 @@ def parse():
 			\n-w: use words instead of random letter strings for easier memorization, off by default
 			\n-q: quick setting for my most common options without words \'-sA -p -g 3 -l 32 -cH\'
 			\n-qW: quick setting for my most common options with words \'-sA -p -g 3 -l 32 -w 5 -cH\'
-			\n-o: do not write to file, off by default
+			\n-o: overwite existing file, off by default
+			\n-oN: do not write to file, off by default
 			\n-c: save to clipboard and show output, off by default
 			\n-cH: save to clipboard and hide output, on by default
 			\n-cN: don't save to clipboard, on by default
@@ -182,6 +181,8 @@ def parse():
 	arguments['words'] = True
 	arguments['maxWordLength'] = 4
 	arguments['useClipboard'] = 2 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 		
+	arguments['overwrite'] = False
+	arguments['fileExtension'] = '.txt'
 
 	#if True:
 	try:
@@ -211,7 +212,7 @@ def parse():
 			elif args[i] == '-g':
 				arguments['growthFactor'] = int(args[i+1])
 				if arguments['growthFactor'] > 3 or arguments['growthFactor'] < -3:
-					exit(1)
+					sys.exit(0)
 			elif args[i] == '-s':
 				arguments['symbols'] = args[i+1]
 				arguments['symbols'] = arguments['symbols'].replace('\'', '')
@@ -227,10 +228,14 @@ def parse():
 				arguments['length'] = int(args[i+1])
 			elif args[i] == '-p':
 				arguments['encrypt'] = 1
+				arguments['fileExtension'] = '.pad'
 			elif args[i] == '-e':
 				arguments['encrypt'] = 2
-			elif args[i] == '-o':
+				arguments['fileExtension'] = '.enc'
+			elif args[i] == '-oN':
 				arguments['encrypt'] = 3
+			elif args[i] == '-o':
+				arguments['overwrite'] = True
 			elif args[i] == '-cN':
 				arguments['useClipboard'] = 0
 			elif args[i] == '-c':
@@ -244,7 +249,7 @@ def parse():
 						
 	except:
 	 	print('arguments missing or formatted incorrectly')
-	 	exit(1)	
+	 	sys.exit(0)
 
 	if 'microsoft-x86_64-with-ubuntu' in platform.platform().lower():
 		print("Windows Subsystem for Linux detected, showing cleartext")
@@ -331,8 +336,15 @@ def scrambleWithWords(pinhash, arguments, wordlist):
 def printWithoutWriting(contents):
 	print('\nnew password: ' + contents + '\nlength'+ arguments['length'] + '\nfile: ' + 'none' + '\npadding: true\nencryption: false')
 
+def check_for_existing_files(arguments):
+	if os.path.isfile('files/'+arguments['fileName']+arguments['fileExtension']):
+		print(f'File exists with name {arguments[fileName]}, exiting')
+		sys.exit(0)
+
 def main():
-	arguments = parse()	
+	arguments = parse()
+	if not arguments['overwrite']:
+		check_for_existing_files(arguments)
 	wordlist = ''	
 	pinhash = hashlib.sha256(arguments['pinstr'].encode('ascii')).hexdigest()
 

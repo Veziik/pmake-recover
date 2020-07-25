@@ -106,8 +106,6 @@ def writePaddedFile(contents, wordlist, arguments):
 	
 	finalBlockOfText = (front + contents + back)	
 
-	#print(frontlen)
-	#print(finalBlockOfText)
 
 	textEncrypted = False
 	if arguments['encrypt'] == 2:
@@ -196,6 +194,7 @@ def parse():
 				else:
 					arguments['symbols'] = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
 				arguments['encrypt'] = 2
+				arguments['fileExtension'] = '.enc'
 				arguments['length'] = 32
 
 			elif args[i] == '-qW':
@@ -206,6 +205,7 @@ def parse():
 				else:
 					arguments['symbols'] = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
 				arguments['encrypt'] = 2
+				arguments['fileExtension'] = '.enc'
 				arguments['length'] = 16
 				arguments['words'] = True
 				arguments['maxWordLength'] = 4
@@ -338,7 +338,8 @@ def printWithoutWriting(contents):
 
 def check_for_existing_files(arguments):
 	if os.path.isfile('files/'+arguments['fileName']+arguments['fileExtension']):
-		print(f'File exists with name {arguments[fileName]}, exiting')
+		fileName = arguments['fileName']
+		print(f'File exists with name {fileName}, exiting')
 		sys.exit(0)
 
 def main():

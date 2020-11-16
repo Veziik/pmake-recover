@@ -5,7 +5,11 @@ import struct
 import hashlib
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-import pyperclip
+try:
+	import pyperclip
+except:
+	pass
+	
 import platform
 
 def seedFrontTrashlength():

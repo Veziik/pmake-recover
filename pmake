@@ -6,7 +6,10 @@ import hashlib
 import random
 import time
 import struct
-import pyperclip
+try:
+	import pyperclip
+except:
+	pass
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from words import *

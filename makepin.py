@@ -183,7 +183,7 @@ def parse():
 	arguments['maxWordLength'] = 4
 	arguments['useClipboard'] = 2 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 		
 	arguments['overwrite'] = False
-	arguments['fileExtension'] = '.txt'
+	arguments['fileExtension'] = '.enc'
 
 	#if True:
 	try:

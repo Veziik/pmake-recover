@@ -2,7 +2,6 @@
 import sys
 import os
 import platform
-import hashlib
 import random
 import time
 import struct
@@ -10,9 +9,8 @@ try:
 	import pyperclip
 except:
 	pass
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
 from words import *
+from utilities import *
 
 
 def replaceWithSymbol(optionalSymbols):
@@ -40,22 +38,6 @@ def addWord(wordlist, length):
 
 		return wordsOfACertainLength[random.randint(0,len(wordsOfACertainLength)-1)]
 
-def createIV(arguments):
-	hashable1 = arguments['key'] + arguments['fileName']
-	return hashlib.sha256(hashable1.encode('utf-8')).hexdigest()[0:16]
-
-def encryptString(arguments, string):
-	#print('\n\n\n OFFSET:' + str(len(string)%16) + ' \n\n\n')
-	offset = len(string)%16
-	string = string[0:(len(string)-offset)]
-	backend = default_backend()
-	key = arguments['key']
-	iv = createIV(arguments)
-	cipher = Cipher(algorithms.AES(key.encode('utf-8')), modes.CBC(iv.encode('utf-8')), backend=backend)
-	encryptor = cipher.encryptor()
-	ct = encryptor.update(string.encode('utf-8')) + encryptor.finalize()
-	return ct
-
 def writePlaintextFile(contents, arguments):
 	with open('files/'+arguments['fileName'] + arguments['fileExtension'] , 'w') as file:	
 		file.write(contents)
@@ -70,10 +52,8 @@ def writePaddedFile(contents, wordlist, arguments):
 	front = ''
 	back = ''
 	writeProtocol = 'w'
-	#print('front: ' + str(seedFrontTrashlength()))
-	#print('back: ' + str(seedBackTrashlength()))
-	frontlen = seedFrontTrashlength()
-	backlen = seedBackTrashlength()
+	frontlen = seedFrontTrashlength(arguments)
+	backlen = seedBackTrashlength(arguments)
 	
 	if os.path.isfile('files/'+arguments['fileName'] + '.pad'):
 		os.remove('files/'+arguments['fileName'] + '.pad')
@@ -125,32 +105,26 @@ def writePaddedFile(contents, wordlist, arguments):
 			contents = '[CONTENTS REDACTED]'
 		print('\nnew password: ' + contents + '\nlength: '+ arguments['length'] + '\nfile: ' + 'files/'+arguments['fileName'] + '\npadding: True\nencryption: ' + str(textEncrypted))
 
-def seedFrontTrashlength():
-	sum1 = 0
-	for letter in sys.argv[1]:
-		sum1 += ord(letter)
+def overrideConfigsWithFile(file, arguments):
+	readable = False
+	for line in file:
+		filtered_line = line.replace(" ","").replace("\n","")
+		if readable and len(line)>2 and '[' not in line:
+			line_split = filtered_line.split('=')
+			argument_key = line_split[0]
+			argument_value = line_split[1]
+			arguments[argument_key] = argument_value
+		if "[pmake]" in filtered_line.lower():
+			readable = True
+		if "[precover]" in filtered_line.lower():
+			readable = False		
+	file.close()
+	arguments['startingIndex'] = 2
+	return arguments
 
-	sum2 = 0
-	for letter in sys.argv[2]:
-		sum2 += ord(letter)
 
-	return (sum1 ^ sum2)
-
-def seedBackTrashlength():
-	sum1 = 0
-	for letter in sys.argv[1]:
-		sum1 -= ord(letter)
-
-	sum2 = 0
-	for letter in sys.argv[2]:
-		sum2 += ord(letter)
-
-	return abs(~(sum1 & sum2))
-
-def parse():
-
-	if len(sys.argv) < 3:
-		print("""\nusage: """ + sys.argv[0] + """ <key> <save location> [options]
+def showHelpTextAndExit():
+	print("""\nusage: """ + sys.argv[0] + """ <key> <save location> [options]
 			\noptions:
 			\n-s <string> : symbols to use [none set by default] 
 			\n-sA: use set of all possible non-numeric, non alphabetic ascii symbols 
@@ -168,27 +142,44 @@ def parse():
 			\n-cH: save to clipboard and hide output, on by default
 			\n-cN: don't save to clipboard, on by default
 			""")
-		sys.exit(0)
+	sys.exit(0)
 
+def parse():
+	config_file = findConfigFile()
 	
+	if len(sys.argv) < 3 and not config_file:
+		showHelpTextAndExit()
+
 	arguments = dict()
-	arguments['fileName'] = sys.argv[2]# + '.card'
-	arguments['pinstr'] = sys.argv[2]+sys.argv[1]
+	arguments['fileName'] = sys.argv[1]
 	arguments['growthFactor'] = 3
 	arguments['symbols'] = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
 	arguments['length'] = 16
 	arguments['encrypt'] = 2
-	arguments['key'] = hashlib.sha256(sys.argv[1].encode('ascii')).hexdigest()[0:32]
 	arguments['words'] = True
 	arguments['maxWordLength'] = 4
 	arguments['useClipboard'] = 2 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 		
 	arguments['overwrite'] = False
 	arguments['fileExtension'] = '.enc'
+	arguments['startingIndex'] = 3
 
-	#if True:
+	if config_file:
+		arguments = overrideConfigsWithFile(config_file, arguments)
+		
+	if "key" not in arguments.keys():
+		try:
+			arguments['key'] = sys.argv[2]
+		except:
+			print(f"""Key not provided, if you're using a config file, remember to add key=<key>.""")
+			showHelpTextAndExit()
+
+
+	arguments['pinstr'] = arguments['fileName']+arguments['key']
+	arguments['hash'] = hashlib.sha256(arguments['key'].encode('ascii')).hexdigest()[0:32]
+
 	try:
 		args = sys.argv
-		for i in range(3, len(args)):
+		for i in range(arguments['startingIndex'], len(args)):
 			if args[i] == '-q':
 				arguments['growthFactor'] = 3
 				arguments['symbols'] = ''
@@ -249,14 +240,23 @@ def parse():
 				arguments['words'] = True
 				if i+1 < len(args) and '-' not in args[i+1] and not int(args[i+1]) < 1:
 					arguments['maxWordLength'] = int(args[i+1])
+			elif args[i] == '-h':
+				showHelpText()
 						
 	except:
 	 	print('arguments missing or formatted incorrectly')
-	 	sys.exit(0)
+	 	showHelpTextAndExit()
 
 	if 'microsoft-x86_64-with-ubuntu' in platform.platform().lower():
-		print("Windows Subsystem for Linux detected, showing cleartext")
+		print("Windows Subsystem for Linux 1 detected, showing cleartext")
 		arguments['useClipboard'] = 0 
+
+	arguments['growthFactor'] = int(arguments['growthFactor'])
+	arguments['length'] = int(arguments['length'])
+	arguments['encrypt'] = int(arguments['encrypt'])
+	arguments['maxWordLength'] = int(arguments['maxWordLength'])
+	arguments['useClipboard'] = int(arguments['useClipboard'])
+	arguments['startingIndex'] = int(arguments['startingIndex'])
 
 	return arguments
 
@@ -291,14 +291,12 @@ def scrambleWithWords(pinhash, arguments, wordlist):
 	stop = False
 	i = 0
 
-
-
 	if arguments['length'] == -1:
 		while (not stop) and (i < len(pinhash)):
 			random.seed((time.time()-10000)+i)
 			if random.randint(1,6) >= 4:
 				if pinhash[i].isalpha():
-					newword = addWord(wordlist, arguments['maxWordLength']).capitalize()
+					newword = addWord(wordlist, int(arguments['maxWordLength'])).capitalize()
 					newpass = newpass + newword 
 				
 				elif(pinhash[i].isdigit()):
@@ -314,12 +312,12 @@ def scrambleWithWords(pinhash, arguments, wordlist):
 			i = i+1
 	else:
 		
-		while len(newpass) < arguments['length'] :
+		while len(newpass) < int(arguments['length']) :
 			random.seed((time.time()-100)+i)
 			if random.randint(1,6) >=4:
 				if pinhash[i].isalpha():
 				
-					newword = addWord(wordlist, arguments['length'] - len(newpass)+1).capitalize()
+					newword = addWord(wordlist, int(arguments['length']) - len(newpass)+1).capitalize()
 					
 					newpass = newpass + newword
 				elif(pinhash[i].isdigit()):
@@ -331,8 +329,7 @@ def scrambleWithWords(pinhash, arguments, wordlist):
 			if random.randint(1,6) >= 4 :
 				pinhash = pinhash[int(len(pinhash)/2):int(len(pinhash))] + pinhash[0:int((len(pinhash)/2))]			
 			i = i + 1 
-		newpass = newpass[0:arguments['length']]
-
+		newpass = newpass[0:int(arguments['length'])]
 	
 	return newpass
 
@@ -353,21 +350,23 @@ def main():
 	pinhash = hashlib.sha256(arguments['pinstr'].encode('ascii')).hexdigest()
 
 	if arguments['words']:
-		wordlist = importWords('words.txt', arguments['maxWordLength'])
+		wordlist = importWords('words.txt', int(arguments['maxWordLength']))
 		pinhash = scrambleWithWords(pinhash,arguments, wordlist)
 		
 	else:
-	
 		pinhash = scrambleWithCharacters(pinhash,arguments)
+
 
 	if not os.path.exists('files'):
 		os.makedirs('files')
 
-	if arguments['encrypt'] == 0:
+
+	
+	if int(arguments['encrypt']) == 0:
 		writePlaintextFile(pinhash, arguments)
-	elif arguments['encrypt'] == 1 or arguments['encrypt'] == 2:
+	elif int(arguments['encrypt']) == 1 or int(arguments['encrypt']) == 2:
 		writePaddedFile(pinhash, wordlist, arguments)
-	elif arguments['encrypt'] == 3:
+	elif int(arguments['encrypt']) == 3:
 		printWithoutWriting(pinhash)
 
 if  __name__ == '__main__':

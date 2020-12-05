@@ -2,7 +2,8 @@
 NAME=`hostname` 
 DATE=`date`
 COMMIT=" commit " 
-MESSAGE=""
+MESSAGE1=""
+MESSAGE2=""
 
 if [ $# -eq 1 ]
 then
@@ -12,6 +13,8 @@ fi
 if [ $# -eq 2 ]
 then
 	MESSAGE2=": $2"
+else
+	MESSAGE2=": $1"
 fi
 
 FINALSTR1=$NAME$COMMIT$DATE$MESSAGE1

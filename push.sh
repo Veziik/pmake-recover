@@ -5,9 +5,6 @@ COMMIT=" commit "
 MESSAGE1=""
 MESSAGE2=""
 
-echo "1=$1"
-echo "2=$2"
-
 if  (($# >= 1 ))
 then
 	MESSAGE1=": $1"

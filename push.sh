@@ -5,12 +5,12 @@ COMMIT=" commit "
 MESSAGE1=""
 MESSAGE2=""
 
-if [ $# -eq 1 ]
+if  (($# >= 1 ))
 then
 	MESSAGE1=": $1"
 fi
 
-if [ $# -eq 2 ]
+if (( $# >= 2 ))
 then
 	MESSAGE2=": $2"
 else

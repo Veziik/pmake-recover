@@ -5,6 +5,9 @@ COMMIT=" commit "
 MESSAGE1=""
 MESSAGE2=""
 
+echo "1=$1"
+echo "2=$2"
+
 if  (($# >= 1 ))
 then
 	MESSAGE1=": $1"
@@ -19,10 +22,6 @@ fi
 
 FINALSTR1="$NAME$COMMIT$DATE$MESSAGE1"
 FINALSTR2="$NAME$COMMIT$DATE$MESSAGE2"
-
-
-printf "WAHTFUCK $1"
-
 
 printf "\nstarting program commit and push from $NAME on $DATE...\n"
 printf "\nUsing commit message: $FINALSTR1 \n"

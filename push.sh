@@ -6,22 +6,27 @@ MESSAGE=""
 
 if [ $# -eq 1 ]
 then
-	MESSAGE=": $1"
+	MESSAGE1=": $1"
 fi
 
-FINALSTR=$NAME$COMMIT$DATE$MESSAGE
+if [ $# -eq 2 ]
+then
+	MESSAGE2=": $2"
+fi
 
+FINALSTR1=$NAME$COMMIT$DATE$MESSAGE1
+FINALSTR2=$NAME$COMMIT$DATE$MESSAGE2
 
 printf "\nstarting program commit and push from $NAME on $DATE...\n"
 git add --all
-git commit -m "$FINALSTR"
+git commit -m "$FINALSTR1"
 git push origin master
 printf "\n"
 
 printf "\nstarting file commit and push from $NAME on $DATE...\n"
 cd files
 git add --all
-git commit -m "$FINALSTR"
+git commit -m "$FINALSTR2"
 git push origin master
 cd ../
 printf "\n"

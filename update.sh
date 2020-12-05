@@ -1,3 +1,3 @@
 #! /bin/bash
 ./pull.sh
-./push.sh
+./push.sh $1

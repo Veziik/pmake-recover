@@ -152,12 +152,12 @@ def parse():
 
 	arguments = dict()
 	arguments['fileName'] = sys.argv[1]
-	arguments['growthFactor'] = 3
+	arguments['growthFactor'] = 1
 	arguments['symbols'] = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
-	arguments['length'] = 16
+	arguments['length'] = -1
 	arguments['encrypt'] = 2
 	arguments['words'] = True
-	arguments['maxWordLength'] = 4
+	arguments['maxWordLength'] = -1
 	arguments['useClipboard'] = 2 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 		
 	arguments['overwrite'] = False
 	arguments['fileExtension'] = '.enc'

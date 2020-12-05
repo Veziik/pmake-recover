@@ -21,14 +21,14 @@ FINALSTR1=$NAME$COMMIT$DATE$MESSAGE1
 FINALSTR2=$NAME$COMMIT$DATE$MESSAGE2
 
 printf "\nstarting program commit and push from $NAME on $DATE...\n"
-printf "\nUsing commit message: $FINALSTR1"
+printf "\nUsing commit message: $FINALSTR1 \n"
 git add --all
 git commit -m "$FINALSTR1"
 git push origin master
 printf "\n"
 
 printf "\nstarting file commit and push from $NAME on $DATE...\n"
-printf "\nUsing commit message: $FINALSTR2"
+printf "\nUsing commit message: $FINALSTR2 \n"
 cd files
 git add --all
 git commit -m "$FINALSTR2"

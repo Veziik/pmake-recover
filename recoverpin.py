@@ -23,7 +23,7 @@ def overrideConfigsWithFile(file, arguments):
 	readable = False
 	startingIndex = 4
 	for line in file:
-		filtered_line = line.replace(" ","").replace("\n","")
+		filtered_line = line.replace(" ","").replace("\n","").strip()
 		if readable and len(line)>2 and '[' not in line:
 			line_split = filtered_line.split('=')
 

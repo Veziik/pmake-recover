@@ -108,7 +108,7 @@ def writePaddedFile(contents, wordlist, arguments):
 def overrideConfigsWithFile(file, arguments):
 	readable = False
 	for line in file:
-		filtered_line = line.replace(" ","").replace("\n","")
+		filtered_line = line.replace(" ","").replace("\n","").strip()
 		if readable and len(line)>2 and '[' not in line:
 			line_split = filtered_line.split('=')
 			argument_key = line_split[0]

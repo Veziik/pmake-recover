@@ -20,6 +20,10 @@ fi
 FINALSTR1="$NAME$COMMIT$DATE$MESSAGE1"
 FINALSTR2="$NAME$COMMIT$DATE$MESSAGE2"
 
+
+printf "WAHTFUCK $1"
+
+
 printf "\nstarting program commit and push from $NAME on $DATE...\n"
 printf "\nUsing commit message: $FINALSTR1 \n"
 git add --all

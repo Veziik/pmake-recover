@@ -63,24 +63,29 @@ def parse():
 	arguments = overrideConfigsWithFile(config_file, arguments)
 
 
-	if "key" not in arguments.keys():
-		try:
+	
+	try:
+		if not sys.argv[2].isDigit():
 			arguments['key'] = sys.argv[2]
-		except:
+	except:
+		if "key" not in arguments.keys():
 			print("""Key not provided, if you're using a config file, remember to add key=<key>.""")
 			showHelpTextAndExit()
 
-	if "length" not in arguments.keys():
+	
+	try:
+		int(sys.argv[3])
+		arguments['length'] = sys.argv[3]
+	except:
 		try:
-			arguments['length'] = sys.argv[3]
-			int(sys.argv[3])
+			int(sys.argv[2])
+			arguments['length'] = sys.argv[2]
 		except:
-			try:
-				arguments['length'] = sys.argv[2]
-				int(sys.argv[2])
-			except:
+			if "length" not in arguments.keys():
 				print("""Length not provided, if you're using a config file, remember to add length=<length>.""")
 				showHelpTextAndExit()	
+
+
 	arguments['length'] = int(arguments['length'])
 	arguments['trashLength'] = seedFrontTrashlength(arguments)
 	arguments['hash'] = hashlib.sha256(arguments['key'].encode('ascii')).hexdigest()[0:32]

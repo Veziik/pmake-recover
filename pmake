@@ -124,7 +124,7 @@ def overrideConfigsWithFile(file, arguments):
 
 
 def showHelpTextAndExit():
-	print("""\nusage: """ + sys.argv[0] + """ <key> <save location> [options]
+	print("""\nusage: """ + sys.argv[0] + """<save location> <key>  [options]
 			\noptions:
 			\n-s <string> : symbols to use [none set by default] 
 			\n-sA: use set of all possible non-numeric, non alphabetic ascii symbols 
@@ -152,12 +152,12 @@ def parse():
 
 	arguments = dict()
 	arguments['fileName'] = sys.argv[1]
-	arguments['growthFactor'] = 3
+	arguments['growthFactor'] = 1
 	arguments['symbols'] = ',./;\\[]!@#$%^&*()_+?|:+-=<>:|{}_'
-	arguments['length'] = 16
+	arguments['length'] = -1
 	arguments['encrypt'] = 2
 	arguments['words'] = True
-	arguments['maxWordLength'] = 4
+	arguments['maxWordLength'] = -1
 	arguments['useClipboard'] = 2 # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output 		
 	arguments['overwrite'] = False
 	arguments['fileExtension'] = '.enc'
@@ -166,10 +166,11 @@ def parse():
 	if config_file:
 		arguments = overrideConfigsWithFile(config_file, arguments)
 		
-	if "key" not in arguments.keys():
-		try:
-			arguments['key'] = sys.argv[2]
-		except:
+	
+	try:
+		arguments['key'] = sys.argv[2]
+	except:
+		if "key" not in arguments.keys():
 			print(f"""Key not provided, if you're using a config file, remember to add key=<key>.""")
 			showHelpTextAndExit()
 

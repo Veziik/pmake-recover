@@ -124,7 +124,7 @@ def overrideConfigsWithFile(file, arguments):
 
 
 def showHelpTextAndExit():
-	print("""\nusage: """ + sys.argv[0] + """ <key> <save location> [options]
+	print("""\nusage: """ + sys.argv[0] + """<save location> <key>  [options]
 			\noptions:
 			\n-s <string> : symbols to use [none set by default] 
 			\n-sA: use set of all possible non-numeric, non alphabetic ascii symbols 
@@ -166,10 +166,11 @@ def parse():
 	if config_file:
 		arguments = overrideConfigsWithFile(config_file, arguments)
 		
-	if "key" not in arguments.keys():
-		try:
-			arguments['key'] = sys.argv[2]
-		except:
+	
+	try:
+		arguments['key'] = sys.argv[2]
+	except:
+		if "key" not in arguments.keys():
 			print(f"""Key not provided, if you're using a config file, remember to add key=<key>.""")
 			showHelpTextAndExit()
 

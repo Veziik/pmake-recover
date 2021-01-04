@@ -10,7 +10,7 @@ try:
 except:
 	pass
 from words import *
-from utilities import *
+from helpers import *
 
 
 def replaceWithSymbol(optionalSymbols):

@@ -9,7 +9,7 @@ except:
 	pass
 	
 import platform
-from utilities import *
+from helpers import *
 
 def findConfigFile():
 	file = None

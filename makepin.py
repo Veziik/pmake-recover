@@ -164,8 +164,8 @@ def parse():
     arguments['encrypt'] = 2
     arguments['words'] = True
     arguments['maxWordLength'] = -1
-    arguments[
-        'useClipboard'] = 2  # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output
+    # 0 = don't use clipboard, 1 = use clipboard but still show, 2 = use clipboard and do not show output
+    arguments['useClipboard'] = 2
     arguments['overwrite'] = False
     arguments['fileExtension'] = '.enc'
     arguments['startingIndex'] = 3
@@ -341,15 +341,15 @@ def scrambleWithWords(pinhash, arguments, wordlist):
     return newpass
 
 
-def printWithoutWriting(contents):
+def print_without_writing(contents, arguments):
     print('\nnew password: ' + contents + '\nlength' + arguments[
         'length'] + '\nfile: ' + 'none' + '\npadding: true\nencryption: false')
 
 
 def check_for_existing_files(arguments):
     if os.path.isfile('files/' + arguments['fileName'] + arguments['fileExtension']):
-        fileName = arguments['fileName']
-        print(f'File exists with name {fileName}, exiting')
+        file_name = arguments['fileName']
+        print(f'File exists with name {file_name}, exiting')
         sys.exit(0)
 
 
@@ -375,7 +375,7 @@ def main():
     elif int(arguments['encrypt']) == 1 or int(arguments['encrypt']) == 2:
         write_padded_file(pinhash, wordlist, arguments)
     elif int(arguments['encrypt']) == 3:
-        printWithoutWriting(pinhash)
+        print_without_writing(pinhash, arguments)
 
 
 if __name__ == '__main__':

@@ -119,7 +119,7 @@ def pull(arguments):
         if not arguments['showPass']:
             try:
                 pyperclip.copy(recovered)
-            except NotImplementedError:
+            except pyperclip.PyperclipException:
                 print('Platform does not support pyperclip, showing password in shell.')
                 print('\nrecovered: ' + recovered)
         else:

@@ -1,13 +1,11 @@
 #! /usr/bin/env python3
 import sys
-import platform
-import struct
-import hashlib
 
 try:
     import pyperclip
+    SUPPORTS_PYPERCLIP = True
 except:
-    pass
+    SUPPORTS_PYPERCLIP = False
 
 import platform
 from helpers import *
@@ -66,8 +64,6 @@ def parse():
     arguments['startingIndex'] = 4
 
     arguments = override_configs_with_file(config_file, arguments)
-    # import pdb
-    # pdb.set_trace()
     try:
         if not sys.argv[2].isdigit() and not arguments['key']:
             arguments['key'] = sys.argv[2]
@@ -100,8 +96,8 @@ def parse():
         if sys.argv[i] == '-s':
             arguments['showPass'] = True
 
-    if platform.platform().lower() in ['microsoft-x86_64-with-ubuntu', 'linux-4.14.190-25741239-abg973u1ueu9iwh2-aarch64-with-libc'] :
-        print("Platform does not support pyperclicp, showing password in shell.")
+    if not SUPPORTS_PYPERCLIP:
+        print("Platform does not support pyperclip, showing password in shell.")
         arguments['showPass'] = True
 
     return arguments
@@ -129,7 +125,6 @@ def pull(arguments):
 
 def main():
     arguments = parse()
-    print(f"Operating on {platform.platform()}")
     pull(arguments)
 
 

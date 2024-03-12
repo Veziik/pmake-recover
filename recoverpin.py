@@ -117,8 +117,11 @@ def pull(arguments):
 
         recovered = contents[arguments['trashLength']:arguments['trashLength'] + arguments['length']]
         if not arguments['showPass']:
-            pyperclip.copy(recovered)
-            print('\nPassword recovered and copied to clipboard, Try not to paste prematurely\n')
+            try:
+                pyperclip.copy(recovered)
+            except NotImplementedError:
+                print('Platform does not support pyperclip, showing password in shell.')
+                print('\nrecovered: ' + recovered)
         else:
             print('\nrecovered: ' + recovered)
 

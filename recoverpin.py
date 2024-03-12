@@ -100,8 +100,8 @@ def parse():
         if sys.argv[i] == '-s':
             arguments['showPass'] = True
 
-    if 'microsoft-x86_64-with-ubuntu' in platform.platform().lower():
-        print("Windows Subsystem for Linux detected, showing cleartext")
+    if platform.platform().lower() in ['microsoft-x86_64-with-ubuntu', 'linux-4.14.190-25741239-abg973u1ueu9iwh2-aarch64-with-libc'] :
+        print("Platform does not support pyperclicp, showing password in shell.")
         arguments['showPass'] = True
 
     return arguments

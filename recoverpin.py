@@ -66,9 +66,10 @@ def parse():
     arguments['startingIndex'] = 4
 
     arguments = override_configs_with_file(config_file, arguments)
-
+    # import pdb
+    # pdb.set_trace()
     try:
-        if not sys.argv[2].isDigit():
+        if not sys.argv[2].isdigit() and not arguments['key']:
             arguments['key'] = sys.argv[2]
     except IndexError:
         if "key" not in arguments.keys():
@@ -78,11 +79,11 @@ def parse():
     try:
         int(sys.argv[3])
         arguments['length'] = sys.argv[3]
-    except IndexError:
+    except (IndexError, ValueError):
         try:
             int(sys.argv[2])
             arguments['length'] = sys.argv[2]
-        except IndexError:
+        except (IndexError, ValueError):
             if "length" not in arguments.keys():
                 print("""Length not provided, if you're using a config file, remember to add length=<length>.""")
                 show_help_text_and_exit()
@@ -128,6 +129,7 @@ def pull(arguments):
 
 def main():
     arguments = parse()
+    print(f"Operating on {platform.platform()}")
     pull(arguments)
 
 

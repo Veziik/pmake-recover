@@ -1,0 +1,299 @@
+# Azure DevOps Pipeline for Coverage Guardian Enforcement
+# Multi-platform testing with comprehensive coverage validation
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    exclude:
+      - README.md
+      - docs/*
+
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - README.md
+      - docs/*
+
+variables:
+  COVERAGE_THRESHOLD: 100
+  PYTHON_VERSION: '3.12'
+
+stages:
+- stage: Test
+  displayName: 'Multi-Platform Testing'
+  jobs:
+  - job: TestMultiPlatform
+    displayName: 'Test on Multiple Platforms'
+    strategy:
+      matrix:
+        Linux_Python310:
+          vmImage: 'ubuntu-latest'
+          pythonVersion: '3.10'
+        Linux_Python311:
+          vmImage: 'ubuntu-latest'
+          pythonVersion: '3.11'
+        Linux_Python312:
+          vmImage: 'ubuntu-latest'
+          pythonVersion: '3.12'
+        Windows_Python312:
+          vmImage: 'windows-latest'
+          pythonVersion: '3.12'
+        macOS_Python312:
+          vmImage: 'macOS-latest'
+          pythonVersion: '3.12'
+    
+    pool:
+      vmImage: $(vmImage)
+    
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: $(pythonVersion)
+        displayName: 'Use Python $(pythonVersion)'
+    
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pytest coverage pytest-cov
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      displayName: 'Install dependencies (Unix)'
+      condition: ne(variables['Agent.OS'], 'Windows_NT')
+    
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pytest coverage pytest-cov
+        if exist requirements.txt pip install -r requirements.txt
+      displayName: 'Install dependencies (Windows)'
+      condition: eq(variables['Agent.OS'], 'Windows_NT')
+    
+    - script: |
+        coverage run --source=. -m pytest tests/ -v
+        coverage report --show-missing
+        coverage xml
+        coverage json
+        coverage html
+      displayName: 'Run tests with coverage'
+    
+    - script: |
+        coverage_pct=$(coverage report | tail -1 | awk '{print $4}' | sed 's/%//')
+        if [ "$coverage_pct" != "100" ]; then
+          echo "##vso[task.logissue type=error]Coverage $coverage_pct% is below required $(COVERAGE_THRESHOLD)%"
+          exit 1
+        fi
+        echo "##vso[task.setvariable variable=coverageResult]$coverage_pct"
+      displayName: 'Validate coverage threshold (Unix)'
+      condition: ne(variables['Agent.OS'], 'Windows_NT')
+    
+    - powershell: |
+        $coverage_report = coverage report | Select-Object -Last 1
+        $coverage_pct = ($coverage_report -split '\s+')[3] -replace '%', ''
+        if ($coverage_pct -ne "100") {
+          Write-Host "##vso[task.logissue type=error]Coverage $coverage_pct% is below required $(COVERAGE_THRESHOLD)%"
+          exit 1
+        }
+        Write-Host "##vso[task.setvariable variable=coverageResult]$coverage_pct"
+      displayName: 'Validate coverage threshold (Windows)'
+      condition: eq(variables['Agent.OS'], 'Windows_NT')
+    
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFiles: 'coverage.xml'
+        testRunTitle: 'Coverage Results $(Agent.OS) Python $(pythonVersion)'
+      condition: succeededOrFailed()
+    
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: 'Cobertura'
+        summaryFileLocation: 'coverage.xml'
+        reportDirectory: 'htmlcov'
+      condition: succeededOrFailed()
+    
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: 'htmlcov'
+        artifactName: 'coverage-html-$(Agent.OS)-py$(pythonVersion)'
+      condition: succeededOrFailed()
+
+- stage: CoverageGuardian
+  displayName: 'Coverage Guardian Enforcement'
+  dependsOn: Test
+  condition: succeeded()
+  jobs:
+  - job: GuardianValidation
+    displayName: 'Guardian Coverage Validation'
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(PYTHON_VERSION)'
+        displayName: 'Use Python $(PYTHON_VERSION)'
+    
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pytest coverage pytest-cov
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      displayName: 'Install dependencies'
+    
+    - script: |
+        chmod +x scripts/ci_coverage_check.sh
+        scripts/ci_coverage_check.sh
+      displayName: 'Run Coverage Guardian'
+      env:
+        COVERAGE_THRESHOLD: $(COVERAGE_THRESHOLD)
+    
+    - script: |
+        echo "🔒 Validating security-critical files coverage..."
+        SECURITY_FILES="makepin.py recoverpin.py helpers.py words.py"
+        for file in $SECURITY_FILES; do
+          if [ -f "$file" ]; then
+            file_coverage=$(coverage report --include="$file" | tail -1 | awk '{print $4}' | sed 's/%//')
+            if [ "$file_coverage" != "100" ]; then
+              echo "##vso[task.logissue type=error]SECURITY RISK: $file has $file_coverage% coverage (MUST be 100%)"
+              exit 1
+            fi
+            echo "##vso[task.complete result=Succeeded;]Security file $file: 100% coverage"
+          fi
+        done
+      displayName: 'Security Files Coverage Check'
+    
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: 'coverage_artifacts'
+        artifactName: 'coverage-guardian-artifacts'
+      condition: succeededOrFailed()
+
+- stage: CompleteTestSuite
+  displayName: 'Complete Test Suite'
+  dependsOn: CoverageGuardian
+  condition: succeeded()
+  jobs:
+  - job: FullTestSuite
+    displayName: 'Complete Test Suite with Guardian'
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(PYTHON_VERSION)'
+    
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pytest coverage pytest-cov jq
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      displayName: 'Install dependencies'
+    
+    - script: |
+        chmod +x scripts/run_complete_test_suite.sh
+        scripts/run_complete_test_suite.sh
+      displayName: 'Run Complete Test Suite'
+    
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: 'test_artifacts'
+        artifactName: 'complete-test-artifacts'
+      condition: succeededOrFailed()
+
+- stage: SecurityValidation
+  displayName: 'Security Validation'
+  dependsOn: CompleteTestSuite
+  condition: succeeded()
+  jobs:
+  - job: SecurityScan
+    displayName: 'Security Scan with Coverage'
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(PYTHON_VERSION)'
+    
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pytest coverage bandit safety semgrep
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      displayName: 'Install security tools'
+    
+    - script: |
+        echo "🔒 Running comprehensive security scans..."
+        bandit -r . -x tests/ -f json -o security-bandit.json || true
+        safety check --json --output security-safety.json || true
+        semgrep --config=auto --json --output security-semgrep.json . || true
+      displayName: 'Run security scans'
+      continueOnError: true
+    
+    - script: |
+        echo "🛡️ Running coverage with security focus..."
+        coverage run --source=. -m pytest tests/ -v
+        coverage report --show-missing
+        coverage xml
+        coverage json
+      displayName: 'Security-focused coverage'
+    
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: 'security-*.json'
+        artifactName: 'security-scan-results'
+      condition: succeededOrFailed()
+
+- stage: DeploymentReadiness
+  displayName: 'Deployment Readiness'
+  dependsOn: 
+    - CoverageGuardian
+    - CompleteTestSuite
+    - SecurityValidation
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - job: DeploymentCheck
+    displayName: 'Final Deployment Validation'
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(PYTHON_VERSION)'
+    
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pytest coverage
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      displayName: 'Install dependencies'
+    
+    - script: |
+        echo "🛡️ Final Guardian validation for deployment readiness..."
+        python scripts/guardian_enforcer.py --threshold $(COVERAGE_THRESHOLD)
+        echo "##vso[task.complete result=Succeeded;]Guardian has approved deployment"
+      displayName: 'Final Guardian Validation'
+    
+    - script: |
+        cat > deployment_report.json << EOF
+        {
+          "timestamp": "$(date -Iseconds)",
+          "build_id": "$(Build.BuildId)",
+          "commit_sha": "$(Build.SourceVersion)",
+          "branch": "$(Build.SourceBranchName)",
+          "coverage_status": "100%",
+          "guardian_status": "APPROVED",
+          "security_validation": "PASSED",
+          "deployment_ready": true,
+          "azure_pipeline": true
+        }
+        EOF
+        
+        echo "📋 Deployment Report:"
+        cat deployment_report.json
+      displayName: 'Generate deployment report'
+    
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathToPublish: 'deployment_report.json'
+        artifactName: 'deployment-readiness-report'

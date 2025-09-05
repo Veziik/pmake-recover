@@ -167,6 +167,28 @@ repos:
         pass_filenames: false
         stages: [pre-push]
 
+  # Test Guardian - 100% Coverage Enforcement
+  - repo: local
+    hooks:
+      - id: test-guardian-coverage
+        name: Test Guardian - 100% Coverage Enforcement
+        entry: bash -c 'coverage run --source=. -m pytest && coverage report | tail -1 | awk "{print \$4}" | sed "s/%//" | xargs -I {} test {} = "100" || (echo "ERROR: Coverage must be 100%" && exit 1)'
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [commit]
+
+  # Coverage report generation
+  - repo: local
+    hooks:
+      - id: coverage-report-generation
+        name: Generate Coverage Reports
+        entry: bash -c 'coverage run --source=. -m pytest && coverage html && coverage xml && coverage json && echo "Coverage reports generated successfully"'
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [commit]
+
   # Security test runner
   - repo: local
     hooks:

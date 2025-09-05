@@ -1,0 +1,54 @@
+{
+  "timestamp": "2025-09-05T00:28:01-04:00",
+  "ci_environment": {
+    "detected_environments": [],
+    "primary": null,
+    "is_ci": false
+  },
+  "capabilities": {
+    "artifact_upload": false,
+    "parallel_jobs": false,
+    "docker_support": false,
+    "coverage_reporting": false,
+    "notification_support": false,
+    "deployment_support": false,
+    "secret_management": false
+  },
+  "build_info": {
+    "build_id": null,
+    "build_number": null,
+    "commit_sha": null,
+    "branch": null,
+    "pull_request": null,
+    "repository": null,
+    "build_url": null
+  },
+  "coverage_configuration": {
+    "enabled": false,
+    "formats": [
+      "console"
+    ]
+  },
+  "recommended_commands": {
+    "setup": [
+      "python -m pip install --upgrade pip",
+      "pip install pytest coverage pytest-cov",
+      "pip install -r requirements.txt"
+    ],
+    "test": [
+      "coverage run --source=. -m pytest tests/ -v"
+    ],
+    "coverage": [
+      "coverage report --show-missing",
+      "coverage html",
+      "coverage xml",
+      "coverage json"
+    ],
+    "validation": [
+      "coverage report --fail-under=100"
+    ],
+    "artifact_upload": []
+  },
+  "python_version": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]",
+  "platform": "linux"
+}

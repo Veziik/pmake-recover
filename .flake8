@@ -1,0 +1,83 @@
+# Flake8 configuration for pmake-recover
+# Security-focused linting with comprehensive checks
+
+[flake8]
+# Base configuration
+max-line-length = 88
+max-complexity = 10
+max-doc-length = 88
+
+# File selection
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    .tox,
+    .eggs,
+    *.egg-info,
+    build,
+    dist,
+    .pytest_cache,
+    htmlcov,
+    .coverage*,
+    .vs
+
+# Error codes to ignore (compatible with Black formatting)
+ignore = 
+    E203,    # whitespace before ':'
+    W503,    # line break before binary operator
+    E501,    # line too long (handled by Black)
+
+# Error codes to enforce
+select = 
+    E,      # pycodestyle errors
+    W,      # pycodestyle warnings
+    F,      # pyflakes
+    C90,    # mccabe complexity
+    N,      # pep8-naming
+    B,      # flake8-bugbear
+    S,      # flake8-bandit (security)
+
+# Per-file ignores
+per-file-ignores = 
+    # Test files can have longer lines and security issues
+    tests/*.py:S101,S105,S106,S107,S108,S602,S603,S604,S605,S606,S607,S608,S609,E501
+    # Setup and configuration files
+    setup.py:S105,S106,S107
+    conftest.py:S101,S105,S106,S107
+
+# Naming conventions
+# N806: variable in function should be lowercase
+# N802: function name should be lowercase  
+# N803: argument name should be lowercase
+# N801: class names should use CapWords convention
+
+# Security-specific configuration
+# S101: Use of assert (allowed in tests)
+# S105: Possible hardcoded password
+# S106: Possible hardcoded password
+# S107: Possible hardcoded password  
+# S108: Probable insecure usage of temp file/directory
+# S602-S609: Various subprocess and shell injection issues
+
+# Complexity settings
+max-cognitive-complexity = 15
+max-expression-complexity = 7
+
+# Documentation requirements
+require-code = True
+strictness = long
+docstring-style = google
+
+# Import organization
+application-import-names = pmake-recover
+import-order-style = google
+
+# Bugbear plugin settings
+extend-ignore = 
+    B008,   # Do not perform function calls in argument defaults
+
+# Additional checks
+hang-closing = True
+inline-quotes = double
+multiline-quotes = double

@@ -1,0 +1,294 @@
+# Modern Python project configuration for pmake-recover
+# Centralizes tool configurations in a single file
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pmake-recover"
+version = "1.0.0"
+description = "Secure password generation and recovery system"
+readme = "readme.md"
+license = {text = "MIT"}
+authors = [
+    {name = "pmake-recover team"}
+]
+maintainers = [
+    {name = "pmake-recover team"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Utilities"
+]
+keywords = ["password", "security", "encryption", "recovery"]
+requires-python = ">=3.11"
+dependencies = [
+    "pyperclip>=1.8.0",
+    "cryptography>=41.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-xdist>=3.3.0",
+    "pytest-mock>=3.11.0",
+    "pytest-timeout>=2.1.0",
+    "pytest-sugar>=0.9.7",
+    "coverage[toml]>=7.3.0",
+    "pytest-html>=3.2.0",
+    "pytest-json-report>=1.5.0",
+    "pytest-benchmark>=4.0.0",
+    "bandit>=1.7.5",
+    "safety>=2.3.0",
+    "flake8>=6.0.0",
+    "black>=23.7.0",
+    "isort>=5.12.0",
+    "mypy>=1.5.0",
+    "pylint>=2.17.0",
+    "pre-commit>=3.4.0"
+]
+test = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "coverage[toml]>=7.3.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/pmake-recover/pmake-recover"
+Repository = "https://github.com/pmake-recover/pmake-recover"
+Issues = "https://github.com/pmake-recover/pmake-recover/issues"
+
+[project.scripts]
+pmake = "makepin:main"
+precover = "recoverpin:main"
+
+# Black code formatter configuration
+[tool.black]
+line-length = 88
+target-version = ['py311', 'py312']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | tests/fixtures
+)/
+'''
+
+# isort import sorting configuration
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+known_first_party = ["pmake"]
+known_third_party = ["pytest", "cryptography", "pyperclip"]
+
+# MyPy type checking configuration
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_optional = true
+show_error_codes = true
+show_error_context = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = [
+    "pyperclip.*",
+    "scipy.*",
+    "numpy.*"
+]
+ignore_missing_imports = true
+
+# Pylint configuration
+[tool.pylint]
+load-plugins = [
+    "pylint.extensions.check_elif",
+    "pylint.extensions.bad_builtin",
+    "pylint.extensions.docparams",
+    "pylint.extensions.for_any_all",
+    "pylint.extensions.set_membership",
+    "pylint.extensions.code_style",
+    "pylint.extensions.overlapping_exceptions",
+    "pylint.extensions.typing",
+    "pylint.extensions.redefined_variable_type",
+    "pylint.extensions.comparison_placement"
+]
+
+[tool.pylint.master]
+py-version = "3.11"
+jobs = 0  # Use all available processors
+suggestion-mode = true
+unsafe-load-any-extension = false
+
+[tool.pylint.messages_control]
+disable = [
+    "C0114",  # missing-module-docstring
+    "C0115",  # missing-class-docstring  
+    "C0116",  # missing-function-docstring
+    "R0903",  # too-few-public-methods
+    "R0913",  # too-many-arguments
+    "W0613",  # unused-argument (handled by mypy)
+]
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.pylint.design]
+max-args = 7
+max-attributes = 10
+max-bool-expr = 5
+max-branches = 15
+max-locals = 20
+max-parents = 7
+max-public-methods = 25
+max-returns = 8
+max-statements = 60
+min-public-methods = 1
+
+# Coverage.py configuration
+[tool.coverage.run]
+source = ["."]
+branch = true
+parallel = true
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/.venv/*",
+    "*/site-packages/*",
+    "*/dist/*",
+    "*/build/*",
+    "setup.py",
+    "conftest.py"
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+skip_empty = false
+fail_under = 100
+precision = 2
+sort = "Cover"
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if False:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod"
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+title = "pmake-recover Test Coverage Report"
+show_contexts = true
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+[tool.coverage.json]
+output = "coverage.json"
+show_contexts = true
+
+# Pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--verbose",
+    "-ra",
+    "--cov=.",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html:htmlcov",
+    "--cov-report=xml:coverage.xml",
+    "--cov-fail-under=100",
+    "--cov-branch",
+    "--maxfail=1",
+    "--tb=short",
+    "--color=yes"
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests", 
+    "security: Security tests",
+    "slow: Slow tests (> 1 second)",
+    "requires_file: Tests that require file system access"
+]
+norecursedirs = [
+    ".git",
+    ".venv", 
+    "__pycache__",
+    "*.egg-info",
+    "dist",
+    "build",
+    "htmlcov",
+    ".cache",
+    ".pytest_cache",
+    ".vs"
+]
+filterwarnings = [
+    "error::DeprecationWarning",
+    "error::PendingDeprecationWarning", 
+    "error::FutureWarning"
+]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
+# Bandit security linter configuration
+[tool.bandit]
+exclude_dirs = ["tests", "build", "dist", ".venv"]
+skips = ["B101", "B601"]  # Allow assert and shell usage in specific contexts
+severity = "medium"
+
+[tool.bandit.assert_used]
+skips = ["*/tests/*.py", "*/test_*.py"]
+
+# setuptools configuration  
+[tool.setuptools]
+py-modules = ["makepin", "recoverpin", "helpers", "words"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
+exclude = ["tests*", "*.tests*", "*.tests"]
+
+[tool.setuptools.package-data]
+"*" = ["*.txt", "*.md", "*.yml", "*.yaml", "*.json"]

@@ -86,6 +86,139 @@ hypothesis>=6.75.0        # Property-based testing
 - [ ] pytest configuration validated
 - [ ] Coverage reporting functional (HTML + XML)
 - [ ] test-guardian approval for setup
+# PRP 01c: Security Testing Framework - pmake-recover
+
+## 🚨 WORKTREE REQUIREMENT
+**All work MUST be done in the designated worktree:**
+- **Worktree Path**: `/home/daniel/worktrees/pmake-recover/prp-01c-security-testing`
+- **Branch**: `prp-01c`
+- **Agents MUST**: `cd /home/daniel/worktrees/pmake-recover/prp-01c-security-testing` before any work
+
+## CRITICAL: 100% TEST COVERAGE REQUIRED
+
+**SECURITY-FIRST TESTING - NO EXCEPTIONS**
+- All security functions must have 100% test coverage
+- security-scanner agent has VETO POWER over all code
+- test-guardian-enforced validates security test quality
+
+## PARALLEL EXECUTION: Can run with PRPs 01a, 01b simultaneously
+
+## Specialized Agents Required
+- **security-scanner**: Primary agent for security test framework
+- **test-guardian-enforced**: Strictest test enforcement for security
+- **python-pro**: Security-specific Python testing patterns
+- **test-automator**: Automated security test generation
+
+## Deliverables (ONE ATOMIC FOCUS: Security Testing Infrastructure)
+
+### 1. Security Testing Dependencies
+```python
+# security-requirements.txt
+bandit>=1.7.5              # Security linting
+safety>=2.3.0               # Vulnerability scanning  
+cryptography>=41.0.0        # Secure crypto testing
+pytest-security>=0.1.0     # Security-focused testing
+hypothesis>=6.75.0          # Property-based security testing
+fakeredis>=2.18.0          # Secure mocking for Redis
+```
+
+### 2. Security Test Configuration
+```ini
+# bandit.yml
+skips: []
+tests: []
+exclude_dirs:
+  - /tests
+  - /venv
+
+# pytest-security configuration
+security:
+  hardcoded_password_string: true
+  hardcoded_password_funcdef: true  
+  hardcoded_password_default: true
+  shell_injection: true
+  sql_injection: true
+```
+
+### 3. Security Test Structure
+```
+tests/
+├── security/
+│   ├── __init__.py
+│   ├── test_crypto_security.py      # For PRP 02a
+│   ├── test_password_security.py    # For PRP 02a
+│   ├── test_file_security.py        # For PRP 02b
+│   ├── test_input_validation.py     # For PRP 03
+│   └── test_attack_scenarios.py     # For PRP 03
+├── fixtures/
+│   ├── secure_test_data.py
+│   └── attack_vectors.py
+```
+
+### 4. Security Guardian Integration
+- Pre-commit security scanning with bandit
+- Vulnerability scanning with safety
+- security-scanner agent validation
+- Automated security test generation
+
+## Test Requirements (Security Infrastructure Validation)
+### Security Unit Tests (100% coverage)
+- Test bandit integration and configuration
+- Test safety vulnerability scanning
+- Test security fixture generation
+- Test cryptographic test utilities
+
+### Security Integration Tests (100% coverage)
+- Test end-to-end security scanning pipeline
+- Test security-scanner agent integration
+- Test vulnerability detection accuracy
+- Test security test automation
+
+### Security Property Tests
+```python
+# Example security property test structure
+from hypothesis import given, strategies as st
+
+@given(st.text(min_size=1))
+def test_password_generation_entropy(input_seed):
+    """Property: Generated passwords must have sufficient entropy"""
+    # Will be implemented in PRP 02a
+    pass
+
+@given(st.binary(min_size=1))  
+def test_encryption_reversibility(plaintext):
+    """Property: Encryption must be perfectly reversible"""
+    # Will be implemented in PRP 02a
+    pass
+```
+
+## Security Scanning Pipeline
+```bash
+# Security validation pipeline
+#!/bin/bash
+set -e
+
+# Dependency vulnerability scan
+safety check --json
+
+# Code security analysis
+bandit -r . -f json -o bandit-report.json
+
+# Security test execution
+pytest tests/security/ --cov=. --cov-report=json
+
+# security-scanner agent validation
+echo "All security scans must pass before proceeding"
+```
+
+## Phase Gate - CANNOT PROCEED TO PRP 02a WITHOUT:
+- [ ] 100% test coverage of security infrastructure
+- [ ] All security scanning tools operational (bandit, safety)
+- [ ] security-scanner agent configured and active
+- [ ] Security test structure created and validated
+- [ ] Security fixtures and utilities implemented
+- [ ] Property-based security testing framework ready
+- [ ] Vulnerability scanning pipeline functional
 - [ ] Edit locks cleared for parallel PRPs
 - [ ] Agent collaboration documented
 
@@ -96,6 +229,10 @@ hypothesis>=6.75.0        # Property-based testing
 /run-agent python-pro --task=pytest-setup  
 /run-agent devops-infrastructure-agent --scope=testing
 /run-agent test-guardian --mode=setup-validation
+/run-agent security-scanner --focus=framework-setup
+/run-agent test-guardian-enforced --task=security-validation
+/run-agent python-pro --scope=security-testing-patterns
+/run-agent test-automator --mode=security-test-generation
 ```
 
 ## Edit Lock Protocol
@@ -290,3 +427,231 @@ Coverage Requirement: 100% of reporting system components
 
 ## Status: COMPLETED
 **This PRP has been merged and integrated into the main branch**
+- `security-requirements.txt` (security-scanner lock)
+- `bandit.yml` (security-scanner lock) 
+- `tests/security/` directory (test-automator lock)
+- Security fixtures (python-pro lock)
+
+## Success Validation
+```bash
+# Verify security framework operational
+bandit -r . --exit-zero  # Should run without errors
+safety check             # Should pass vulnerability scan
+pytest tests/security/ --collect-only  # Should discover security tests
+pytest tests/security/ -v              # All security infrastructure tests pass
+```
+
+## Security Test Categories Prepared
+
+### 1. Cryptographic Security (for PRP 02a)
+- Encryption algorithm validation
+- Key management security
+- Cryptographic randomness testing
+- Side-channel attack resistance
+
+### 2. Input Validation Security (for PRP 02b)
+- File path traversal prevention
+- Input sanitization testing
+- Buffer overflow protection  
+- Injection attack prevention
+
+### 3. Authentication Security (for PRP 03)
+- Password complexity validation
+- Session management security
+- Access control testing
+- Privilege escalation prevention
+
+Duration: 3-4 hours
+Parallel Execution: YES (with 01a, 01b)
+Agent Count: 4 specialized agents  
+Coverage Requirement: 100% of security testing infrastructure
+Security Level: MAXIMUM (security-scanner has veto power)
+
+---
+
+# PRP 01c: Security Testing Framework - pmake-recover
+
+## 🚨 WORKTREE REQUIREMENT
+**All work MUST be done in the designated worktree:**
+- **Worktree Path**: `/home/daniel/worktrees/pmake-recover/prp-01c-security-testing`
+- **Branch**: `prp-01c`
+- **Agents MUST**: `cd /home/daniel/worktrees/pmake-recover/prp-01c-security-testing` before any work
+
+## CRITICAL: 100% TEST COVERAGE REQUIRED
+
+**SECURITY-FIRST TESTING - NO EXCEPTIONS**
+- All security functions must have 100% test coverage
+- security-scanner agent has VETO POWER over all code
+- test-guardian-enforced validates security test quality
+
+## PARALLEL EXECUTION: Can run with PRPs 01a, 01b simultaneously
+
+## Specialized Agents Required
+- **security-scanner**: Primary agent for security test framework
+- **test-guardian-enforced**: Strictest test enforcement for security
+- **python-pro**: Security-specific Python testing patterns
+- **test-automator**: Automated security test generation
+
+## Deliverables (ONE ATOMIC FOCUS: Security Testing Infrastructure)
+
+### 1. Security Testing Dependencies
+```python
+# security-requirements.txt
+bandit>=1.7.5              # Security linting
+safety>=2.3.0               # Vulnerability scanning  
+cryptography>=41.0.0        # Secure crypto testing
+pytest-security>=0.1.0     # Security-focused testing
+hypothesis>=6.75.0          # Property-based security testing
+fakeredis>=2.18.0          # Secure mocking for Redis
+```
+
+### 2. Security Test Configuration
+```ini
+# bandit.yml
+skips: []
+tests: []
+exclude_dirs:
+  - /tests
+  - /venv
+
+# pytest-security configuration
+security:
+  hardcoded_password_string: true
+  hardcoded_password_funcdef: true  
+  hardcoded_password_default: true
+  shell_injection: true
+  sql_injection: true
+```
+
+### 3. Security Test Structure
+```
+tests/
+├── security/
+│   ├── __init__.py
+│   ├── test_crypto_security.py      # For PRP 02a
+│   ├── test_password_security.py    # For PRP 02a
+│   ├── test_file_security.py        # For PRP 02b
+│   ├── test_input_validation.py     # For PRP 03
+│   └── test_attack_scenarios.py     # For PRP 03
+├── fixtures/
+│   ├── secure_test_data.py
+│   └── attack_vectors.py
+```
+
+### 4. Security Guardian Integration
+- Pre-commit security scanning with bandit
+- Vulnerability scanning with safety
+- security-scanner agent validation
+- Automated security test generation
+
+## Test Requirements (Security Infrastructure Validation)
+### Security Unit Tests (100% coverage)
+- Test bandit integration and configuration
+- Test safety vulnerability scanning
+- Test security fixture generation
+- Test cryptographic test utilities
+
+### Security Integration Tests (100% coverage)
+- Test end-to-end security scanning pipeline
+- Test security-scanner agent integration
+- Test vulnerability detection accuracy
+- Test security test automation
+
+### Security Property Tests
+```python
+# Example security property test structure
+from hypothesis import given, strategies as st
+
+@given(st.text(min_size=1))
+def test_password_generation_entropy(input_seed):
+    """Property: Generated passwords must have sufficient entropy"""
+    # Will be implemented in PRP 02a
+    pass
+
+@given(st.binary(min_size=1))  
+def test_encryption_reversibility(plaintext):
+    """Property: Encryption must be perfectly reversible"""
+    # Will be implemented in PRP 02a
+    pass
+```
+
+## Security Scanning Pipeline
+```bash
+# Security validation pipeline
+#!/bin/bash
+set -e
+
+# Dependency vulnerability scan
+safety check --json
+
+# Code security analysis
+bandit -r . -f json -o bandit-report.json
+
+# Security test execution
+pytest tests/security/ --cov=. --cov-report=json
+
+# security-scanner agent validation
+echo "All security scans must pass before proceeding"
+```
+
+## Phase Gate - CANNOT PROCEED TO PRP 02a WITHOUT:
+- [ ] 100% test coverage of security infrastructure
+- [ ] All security scanning tools operational (bandit, safety)
+- [ ] security-scanner agent configured and active
+- [ ] Security test structure created and validated
+- [ ] Security fixtures and utilities implemented
+- [ ] Property-based security testing framework ready
+- [ ] Vulnerability scanning pipeline functional
+- [ ] Edit locks cleared for parallel PRPs
+- [ ] Agent collaboration documented
+
+## Agent Execution Commands
+```bash
+# Launch parallel agents for this PRP
+/run-agent security-scanner --focus=framework-setup
+/run-agent test-guardian-enforced --task=security-validation
+/run-agent python-pro --scope=security-testing-patterns
+/run-agent test-automator --mode=security-test-generation
+```
+
+## Edit Lock Protocol
+Files modified by this PRP:
+- `security-requirements.txt` (security-scanner lock)
+- `bandit.yml` (security-scanner lock) 
+- `tests/security/` directory (test-automator lock)
+- Security fixtures (python-pro lock)
+
+## Success Validation
+```bash
+# Verify security framework operational
+bandit -r . --exit-zero  # Should run without errors
+safety check             # Should pass vulnerability scan
+pytest tests/security/ --collect-only  # Should discover security tests
+pytest tests/security/ -v              # All security infrastructure tests pass
+```
+
+## Security Test Categories Prepared
+
+### 1. Cryptographic Security (for PRP 02a)
+- Encryption algorithm validation
+- Key management security
+- Cryptographic randomness testing
+- Side-channel attack resistance
+
+### 2. Input Validation Security (for PRP 02b)
+- File path traversal prevention
+- Input sanitization testing
+- Buffer overflow protection  
+- Injection attack prevention
+
+### 3. Authentication Security (for PRP 03)
+- Password complexity validation
+- Session management security
+- Access control testing
+- Privilege escalation prevention
+
+Duration: 3-4 hours
+Parallel Execution: YES (with 01a, 01b)
+Agent Count: 4 specialized agents  
+Coverage Requirement: 100% of security testing infrastructure
+Security Level: MAXIMUM (security-scanner has veto power)

@@ -1,1 +1,1 @@
-# Test package initialization
+"""Test package initialization for pmake-recover security testing framework"""

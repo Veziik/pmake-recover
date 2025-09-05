@@ -1,0 +1,5 @@
+bandit>=1.7.5              # Security linting
+safety>=2.3.0              # Vulnerability scanning  
+cryptography>=41.0.0       # Secure crypto testing
+hypothesis>=6.75.0         # Property-based security testing
+fakeredis>=2.18.0          # Secure mocking for Redis

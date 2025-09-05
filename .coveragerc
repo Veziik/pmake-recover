@@ -23,11 +23,15 @@ omit =
     */build/*
     setup.py
     conftest.py
+    .coverage*
+    htmlcov/*
 
-# Include patterns - commented out to avoid conflicts with source
-# include = 
-#     *.py
-#     */src/*.py
+# Include security-critical files
+include = 
+    makepin.py
+    recoverpin.py
+    helpers.py
+    words.py
 
 [report]
 # Reporting options
@@ -52,6 +56,7 @@ exclude_lines =
     # Don't complain about missing debug-only code
     def __repr__
     if self\.debug
+    if settings.DEBUG
     
     # Don't complain if tests don't hit defensive assertion code
     raise AssertionError
@@ -64,6 +69,7 @@ exclude_lines =
     
     # Don't complain about abstract methods
     @(abc\.)?abstractmethod
+    class .*\bProtocol\):
     
     # Don't complain about type checking blocks
     if TYPE_CHECKING:
@@ -83,6 +89,7 @@ output = coverage.xml
 # JSON report configuration
 output = coverage.json
 show_contexts = True
+pretty_print = true
 
 # Paths section for CI/CD compatibility
 [paths]

@@ -1,0 +1,13 @@
+skips: []
+tests: []
+exclude_dirs:
+  - /tests
+  - /venv
+  - /__pycache__
+  - /.vs
+
+hardcoded_password_string: true
+hardcoded_password_funcdef: true  
+hardcoded_password_default: true
+shell_injection: true
+sql_injection: true
